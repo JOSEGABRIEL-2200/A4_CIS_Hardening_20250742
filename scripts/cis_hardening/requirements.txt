@@ -1,0 +1,5 @@
+# Asignacion 4 - escaner CIS (Python 3.9 o superior)
+netmiko>=4.3,<5
+# IOS 15 solo negocia intercambio de claves con SHA-1; paramiko 4+ ya no lo ofrece
+paramiko>=3.4,<4
+cryptography>=41

@@ -1,0 +1,43 @@
+! SW1 - ASIGNACION 4 - CONFIGURACION BASE (SIN ENDURECER, A PROPOSITO). Las claves se cambiaron por <CLAVE>.
+! Copia desde "enable" hasta "write memory" y pegalo en la consola de SW1.
+enable
+configure terminal
+hostname SW1
+ip domain-name jose.gabriel
+enable password <CLAVE>
+username admin privilege 15 password <CLAVE>
+vlan 10
+ name LAN
+vlan 99
+ name GESTION
+exit
+interface Ethernet0/0
+ description TRUNK-R1-e0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,99
+ no shutdown
+interface Ethernet0/1
+ description AUDITOR-KALI (NET-AUDITOR)
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast edge
+ no shutdown
+interface range Ethernet0/2 - 3
+ shutdown
+exit
+interface Vlan99
+ description GESTION-SW1
+ ip address 10.7.42.138 255.255.255.248
+ no shutdown
+exit
+no ip routing
+ip default-gateway 10.7.42.137
+snmp-server community public RO
+line vty 0 4
+ login local
+ transport input telnet ssh
+exit
+crypto key generate rsa general-keys modulus 1024
+end
+write memory

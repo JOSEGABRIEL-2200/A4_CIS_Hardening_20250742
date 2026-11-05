@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FortiGate CIS Benchmark Audit Report</title>
+<style>
+:root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #1a2332;
+    --bg-card-hover: #1f2b3d;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-orange: #f59e0b;
+    --accent-purple: #8b5cf6;
+    --border: #1f2937;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.container { max-width: 1400px; margin: 0 auto; padding: 30px; }
+
+/* Header */
+.report-header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1a2e 100%);
+    border-radius: var(--radius);
+    padding: 40px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(59,130,246,0.2);
+    position: relative;
+    overflow: hidden;
+}
+.report-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%);
+    pointer-events: none;
+}
+.report-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+}
+.report-header .subtitle { color: var(--text-secondary); font-size: 14px; }
+.report-header .meta { color: var(--text-muted); font-size: 13px; margin-top: 12px; }
+
+/* Score Cards */
+.score-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.score-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.score-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+.score-card .score-value {
+    font-size: 42px;
+    font-weight: 700;
+    margin: 8px 0;
+}
+.score-card .score-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.score-card .score-detail {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+/* Sections */
+.section {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+}
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-title .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+}
+td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+}
+tr:hover { background: var(--bg-card-hover); }
+
+/* Badges */
+.badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-critical { background: rgba(239,68,68,0.15); color: #f87171; }
+.badge-high { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.badge-medium { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-low { background: rgba(16,185,129,0.15); color: #34d399; }
+.badge-level { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.status-pass { background: rgba(16,185,129,0.15); color: #34d399; }
+.status-fail { background: rgba(239,68,68,0.15); color: #f87171; }
+
+.rule-id {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-weight: 600;
+    color: var(--accent-cyan);
+}
+
+/* Progress bars */
+.progress-bar {
+    width: 120px;
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+}
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+.pct-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-left: 8px;
+}
+
+/* Risk Indicator */
+.risk-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+/* Severity summary */
+.severity-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.severity-item {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    border-left: 3px solid;
+}
+
+/* Search/Filter */
+.controls-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.search-input {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text-primary);
+    font-size: 13px;
+    flex: 1;
+    min-width: 200px;
+}
+.search-input:focus { outline: none; border-color: var(--accent-blue); }
+.filter-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover, .filter-btn.active {
+    background: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+}
+
+.actual-value { color: var(--accent-orange); font-family: monospace; font-size: 12px; }
+.expected-value { color: var(--accent-green); font-family: monospace; font-size: 12px; }
+.remediation { font-size: 12px; color: var(--text-secondary); }
+
+/* Footer */
+.report-footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Print styles */
+@media print {
+    body { background: white; color: #333; }
+    .report-header { background: #f3f4f6; }
+    .section { border: 1px solid #e5e7eb; }
+    .score-card { border: 1px solid #e5e7eb; }
+    .controls-bar { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="report-header">
+        <h1>&#128737; FortiGate CIS Benchmark Audit Report</h1>
+        <div class="subtitle">CIS FortiGate Benchmark v1.3.0 Compliance Assessment</div>
+        <div class="meta">
+            Generated: 2026-11-05 17:20:40 &nbsp;|&nbsp; Config: /home/jose/a4/cis_hardening/reportes/20261105_171812_aplicar/configs/FGT1_despues.conf &nbsp;|&nbsp;
+            Total Controls: 54
+        </div>
+    </div>
+
+    <!-- Executive Summary - Score Cards -->
+    <div class="score-grid">
+        <div class="score-card">
+            <div class="score-label">Overall Compliance</div>
+            <div class="score-value" style="color:#f59e0b">64.8%</div>
+            <div class="score-detail">35/54 controls passed</div>
+            <div class="risk-indicator" style="background:rgba(0,0,0,0.3);color:#ffc107">
+                &#9888; Risk: Medium
+            </div>
+        </div>
+        <div class="score-card">
+            <div class="score-label">Level 1 (Basic)</div>
+            <div class="score-value" style="color:#f59e0b">71.4%</div>
+            <div class="score-detail">25/35 controls passed</div>
+        </div>
+        <div class="score-card">
+            <div class="score-label">Level 2 (Advanced)</div>
+            <div class="score-value" style="color:#f97316">52.6%</div>
+            <div class="score-detail">10/19 controls passed</div>
+        </div>
+        <div class="score-card">
+            <div class="score-label">Weighted Score</div>
+            <div class="score-value" style="color:#f59e0b">61.1%</div>
+            <div class="score-detail">Severity-weighted calculation</div>
+        </div>
+    </div>
+
+    <!-- Severity Breakdown -->
+    <div class="section">
+        <div class="section-title">&#9888;&#65039; Severity Breakdown</div>
+        <div class="severity-grid">
+            <div class="severity-item" style="border-color:#ef4444">
+                <div style="font-size:24px;font-weight:700;color:#f87171">2</div>
+                <div style="font-size:12px;color:var(--text-secondary)">Critical Failures</div>
+                <div style="font-size:11px;color:var(--text-muted)">1/3 passed</div>
+            </div>
+            <div class="severity-item" style="border-color:#f59e0b">
+                <div style="font-size:24px;font-weight:700;color:#fbbf24">11</div>
+                <div style="font-size:12px;color:var(--text-secondary)">High Failures</div>
+                <div style="font-size:11px;color:var(--text-muted)">15/26 passed</div>
+            </div>
+            <div class="severity-item" style="border-color:#3b82f6">
+                <div style="font-size:24px;font-weight:700;color:#60a5fa">5</div>
+                <div style="font-size:12px;color:var(--text-secondary)">Medium Failures</div>
+                <div style="font-size:11px;color:var(--text-muted)">17/22 passed</div>
+            </div>
+            <div class="severity-item" style="border-color:#10b981">
+                <div style="font-size:24px;font-weight:700;color:#34d399">1</div>
+                <div style="font-size:12px;color:var(--text-secondary)">Low Failures</div>
+                <div style="font-size:11px;color:var(--text-muted)">2/3 passed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Heatmap by Category -->
+    <div class="section">
+        <div class="section-title">&#128200; Compliance by Category</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Total</th>
+                    <th>Passed</th>
+                    <th>Failed</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Admin</td>
+                    <td>7</td>
+                    <td>4</td>
+                    <td>3</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:57.1%;background:#f97316"></div>
+                        </div>
+                        <span class="pct-label">57.1%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Firewall</td>
+                    <td>3</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:66.7%;background:#f59e0b"></div>
+                        </div>
+                        <span class="pct-label">66.7%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Logging</td>
+                    <td>4</td>
+                    <td>3</td>
+                    <td>1</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:75.0%;background:#f59e0b"></div>
+                        </div>
+                        <span class="pct-label">75.0%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Network</td>
+                    <td>3</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:66.7%;background:#f59e0b"></div>
+                        </div>
+                        <span class="pct-label">66.7%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Password</td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:100.0%;background:#10b981"></div>
+                        </div>
+                        <span class="pct-label">100.0%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>SNMP</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:0.0%;background:#ef4444"></div>
+                        </div>
+                        <span class="pct-label">0.0%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Security Fabric</td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:100.0%;background:#10b981"></div>
+                        </div>
+                        <span class="pct-label">100.0%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Security Profiles</td>
+                    <td>17</td>
+                    <td>12</td>
+                    <td>5</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:70.6%;background:#f59e0b"></div>
+                        </div>
+                        <span class="pct-label">70.6%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>System</td>
+                    <td>11</td>
+                    <td>7</td>
+                    <td>4</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:63.6%;background:#f59e0b"></div>
+                        </div>
+                        <span class="pct-label">63.6%</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>VPN</td>
+                    <td>4</td>
+                    <td>1</td>
+                    <td>3</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:25.0%;background:#ef4444"></div>
+                        </div>
+                        <span class="pct-label">25.0%</span>
+                    </td>
+                </tr></tbody>
+        </table>
+    </div>
+
+    <!-- Failed Controls -->
+    <div class="section">
+        <div class="section-title">&#10060; Failed Controls (19)</div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Control</th>
+                    <th>Level</th>
+                    <th>Severity</th>
+                    <th>Actual Value</th>
+                    <th>Expected Value</th>
+                    <th>Remediation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="severity-high">
+                    <td><span class="rule-id">1.2</span></td>
+                    <td>Ensure intra-zone traffic is restricted</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">intra-zone-deny: not set</td>
+                    <td class="expected-value">intra-zone-deny: enable</td>
+                    <td class="remediation">Set intra-zone-deny enable under config system global</td>
+                </tr>
+                <tr class="severity-low">
+                    <td><span class="rule-id">2.1.11</span></td>
+                    <td>Ensure CDN is enabled for improved GUI performance</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-low">Low</span></td>
+                    <td class="actual-value">gui-cdn: not set</td>
+                    <td class="expected-value">gui-cdn: enable</td>
+                    <td class="remediation">Enable CDN in system global</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">2.1.7</span></td>
+                    <td>Ensure USB firmware and configuration installation is disabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">usb-auto-install not explicitly set (defaults to enable)</td>
+                    <td class="expected-value">usb-auto-install: disable</td>
+                    <td class="remediation">Disable USB auto-install in system global</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">2.1.8</span></td>
+                    <td>Ensure static keys for TLS are disabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">strong-crypto: not set</td>
+                    <td class="expected-value">strong-crypto: enable</td>
+                    <td class="remediation">Enable strong crypto in system global</td>
+                </tr>
+                <tr class="severity-critical">
+                    <td><span class="rule-id">2.1.9</span></td>
+                    <td>Ensure Global Strong Encryption is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td class="actual-value">strong-crypto: not set</td>
+                    <td class="expected-value">strong-crypto: enable</td>
+                    <td class="remediation">Enable strong-crypto in system global</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">2.3.1</span></td>
+                    <td>Ensure only SNMPv3 is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">SNMP configured but v3-only not enabled</td>
+                    <td class="expected-value">SNMPv3 only</td>
+                    <td class="remediation">Enable SNMPv3 only mode</td>
+                </tr>
+                <tr class="severity-medium">
+                    <td><span class="rule-id">2.4.11</span></td>
+                    <td>Ensure HA Reserved Management Interface is configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td class="actual-value">HA reserved management interface not configured</td>
+                    <td class="expected-value">HA management interface configured</td>
+                    <td class="remediation">Configure HA reserved management interface</td>
+                </tr>
+                <tr class="severity-critical">
+                    <td><span class="rule-id">2.4.5</span></td>
+                    <td>Ensure only encrypted access channels are enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td class="actual-value">HTTPS redirect not enabled</td>
+                    <td class="expected-value">SSH v1 disabled, HTTPS redirect enabled</td>
+                    <td class="remediation">Disable SSH v1 and enable HTTPS redirect</td>
+                </tr>
+                <tr class="severity-medium">
+                    <td><span class="rule-id">2.4.7</span></td>
+                    <td>Ensure default Admin ports are changed</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td class="actual-value">Default ports in use: HTTP port=80, SSH port=22</td>
+                    <td class="expected-value">Non-default admin ports</td>
+                    <td class="remediation">Change HTTP, HTTPS, and SSH admin ports from defaults</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">3.3</span></td>
+                    <td>Ensure Tor and malicious traffic is blocked using ISDB</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">No explicit Tor/malicious traffic blocking found</td>
+                    <td class="expected-value">Tor/malicious ISDB blocking configured</td>
+                    <td class="remediation">Create deny policy using Internet Service Database for Tor</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">4.1.1</span></td>
+                    <td>Ensure Botnet connections are detected</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">Botnet connection scanning not enabled</td>
+                    <td class="expected-value">Botnet scanning enabled</td>
+                    <td class="remediation">Enable botnet connection scanning on interfaces</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">4.2.1</span></td>
+                    <td>Ensure Antivirus Definition Push Updates are configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">Antivirus configured but updates not scheduled</td>
+                    <td class="expected-value">AV update schedule configured</td>
+                    <td class="remediation">Configure antivirus update schedule</td>
+                </tr>
+                <tr class="severity-medium">
+                    <td><span class="rule-id">4.2.3</span></td>
+                    <td>Ensure Outbreak Prevention Database is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td class="actual-value">Outbreak prevention not enabled</td>
+                    <td class="expected-value">Outbreak prevention enabled</td>
+                    <td class="remediation">Enable outbreak prevention in antivirus settings</td>
+                </tr>
+                <tr class="severity-medium">
+                    <td><span class="rule-id">4.3.2</span></td>
+                    <td>Ensure logging is enabled on DNS Filter</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td class="actual-value">DNS filter logging not fully enabled</td>
+                    <td class="expected-value">DNS filter logging enabled</td>
+                    <td class="remediation">Enable logging on DNS filter profiles</td>
+                </tr>
+                <tr class="severity-medium">
+                    <td><span class="rule-id">4.5.3</span></td>
+                    <td>Ensure Content Disarm & Reconstruction is enabled</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td class="actual-value">CDR not explicitly enabled</td>
+                    <td class="expected-value">CDR enabled</td>
+                    <td class="remediation">Enable Content Disarm & Reconstruction</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">6.1.2</span></td>
+                    <td>Ensure limited TLS versions for SSL VPN</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">SSL VPN TLS version: not restricted</td>
+                    <td class="expected-value">TLS 1.2+</td>
+                    <td class="remediation">Set SSL VPN minimum TLS version to 1.2</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">6.2.1</span></td>
+                    <td>Ensure IPsec VPN uses AES-256 encryption</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">IPsec encryption: not AES-256</td>
+                    <td class="expected-value">AES-256 encryption</td>
+                    <td class="remediation">Configure IPsec Phase 1 with AES-256</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">6.2.2</span></td>
+                    <td>Ensure IPsec VPN uses strong DH group</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">IPsec DH group may be weak</td>
+                    <td class="expected-value">DH group ≥ 14</td>
+                    <td class="remediation">Configure IPsec with DH group 14+</td>
+                </tr>
+                <tr class="severity-high">
+                    <td><span class="rule-id">7.2.1</span></td>
+                    <td>Ensure logs sent to FortiAnalyzer/FortiManager are encrypted</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td class="actual-value">Log encryption not configured</td>
+                    <td class="expected-value">Log encryption enabled</td>
+                    <td class="remediation">Enable encryption for log transmission</td>
+                </tr></tbody>
+        </table>
+    </div>
+
+    <!-- All Controls -->
+    <div class="section">
+        <div class="section-title">&#128203; All Controls (54)</div>
+        <div class="controls-bar">
+            <input type="text" class="search-input" placeholder="Search rules..." oninput="filterTable(this.value)" id="searchInput">
+            <button class="filter-btn active" onclick="filterStatus('all', this)">All</button>
+            <button class="filter-btn" onclick="filterStatus('PASS', this)">Pass</button>
+            <button class="filter-btn" onclick="filterStatus('FAIL', this)">Fail</button>
+            <button class="filter-btn" onclick="filterSeverity('Critical', this)">Critical</button>
+            <button class="filter-btn" onclick="filterSeverity('High', this)">High</button>
+            <button class="filter-btn" onclick="filterSeverity('Medium', this)">Medium</button>
+            <button class="filter-btn" onclick="filterSeverity('Low', this)">Low</button>
+        </div>
+        <table id="allControlsTable">
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Control</th>
+                    <th>Level</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Network" data-status="PASS">
+                    <td><span class="rule-id">1.1</span></td>
+                    <td>Ensure DNS server is configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">DNS servers: 208.91.112.53, 208.91.112.52</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="1" data-category="Network" data-status="FAIL">
+                    <td><span class="rule-id">1.2</span></td>
+                    <td>Ensure intra-zone traffic is restricted</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">intra-zone-deny: not set</td>
+                </tr>
+                <tr class="status-pass" data-severity="Critical" data-level="1" data-category="Network" data-status="PASS">
+                    <td><span class="rule-id">1.3</span></td>
+                    <td>Ensure management services are disabled on WAN port</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">No insecure services on WAN ports</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="System" data-status="PASS">
+                    <td><span class="rule-id">2.1.1</span></td>
+                    <td>Ensure Pre-Login Banner is set</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Pre-login banner is enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="System" data-status="PASS">
+                    <td><span class="rule-id">2.1.10</span></td>
+                    <td>Ensure management GUI listens on secure TLS version</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">TLS versions: tlsv1-2</td>
+                </tr>
+                <tr class="status-fail" data-severity="Low" data-level="1" data-category="System" data-status="FAIL">
+                    <td><span class="rule-id">2.1.11</span></td>
+                    <td>Ensure CDN is enabled for improved GUI performance</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-low">Low</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">gui-cdn: not set</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="System" data-status="PASS">
+                    <td><span class="rule-id">2.1.2</span></td>
+                    <td>Ensure Post-Login Banner is set</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Post-login banner is enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Low" data-level="1" data-category="System" data-status="PASS">
+                    <td><span class="rule-id">2.1.3</span></td>
+                    <td>Ensure timezone is properly configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-low">Low</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Timezone set: 15</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="System" data-status="PASS">
+                    <td><span class="rule-id">2.1.4</span></td>
+                    <td>Ensure correct system time is configured through NTP</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">NTP synchronization enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Low" data-level="1" data-category="System" data-status="PASS">
+                    <td><span class="rule-id">2.1.5</span></td>
+                    <td>Ensure hostname is set</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-low">Low</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Hostname: FGT1</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="2" data-category="System" data-status="PASS">
+                    <td><span class="rule-id">2.1.6</span></td>
+                    <td>Ensure the latest firmware is installed</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">FortiOS version: 7.0.3 (manual verification needed)</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="1" data-category="System" data-status="FAIL">
+                    <td><span class="rule-id">2.1.7</span></td>
+                    <td>Ensure USB firmware and configuration installation is disabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">usb-auto-install not explicitly set (defaults to enable)</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="1" data-category="System" data-status="FAIL">
+                    <td><span class="rule-id">2.1.8</span></td>
+                    <td>Ensure static keys for TLS are disabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">strong-crypto: not set</td>
+                </tr>
+                <tr class="status-fail" data-severity="Critical" data-level="1" data-category="System" data-status="FAIL">
+                    <td><span class="rule-id">2.1.9</span></td>
+                    <td>Ensure Global Strong Encryption is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">strong-crypto: not set</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Password" data-status="PASS">
+                    <td><span class="rule-id">2.2.1</span></td>
+                    <td>Ensure Password Policy is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Password policy configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Password" data-status="PASS">
+                    <td><span class="rule-id">2.2.2</span></td>
+                    <td>Ensure administrator password retries and lockout are configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Lockout: threshold=3, duration=900s</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="1" data-category="SNMP" data-status="FAIL">
+                    <td><span class="rule-id">2.3.1</span></td>
+                    <td>Ensure only SNMPv3 is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">SNMP configured but v3-only not enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Admin" data-status="PASS">
+                    <td><span class="rule-id">2.4.10</span></td>
+                    <td>Ensure Monitor Interfaces for HA devices is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">HA monitor interfaces configured</td>
+                </tr>
+                <tr class="status-fail" data-severity="Medium" data-level="1" data-category="Admin" data-status="FAIL">
+                    <td><span class="rule-id">2.4.11</span></td>
+                    <td>Ensure HA Reserved Management Interface is configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">HA reserved management interface not configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Admin" data-status="PASS">
+                    <td><span class="rule-id">2.4.4</span></td>
+                    <td>Ensure idle timeout time is configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Admin timeout: 5 minutes</td>
+                </tr>
+                <tr class="status-fail" data-severity="Critical" data-level="1" data-category="Admin" data-status="FAIL">
+                    <td><span class="rule-id">2.4.5</span></td>
+                    <td>Ensure only encrypted access channels are enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-critical">Critical</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">HTTPS redirect not enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="2" data-category="Admin" data-status="PASS">
+                    <td><span class="rule-id">2.4.6</span></td>
+                    <td>Ensure Local-in Policies are applied</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Local-in policies configured</td>
+                </tr>
+                <tr class="status-fail" data-severity="Medium" data-level="2" data-category="Admin" data-status="FAIL">
+                    <td><span class="rule-id">2.4.7</span></td>
+                    <td>Ensure default Admin ports are changed</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">Default ports in use: HTTP port=80, SSH port=22</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Admin" data-status="PASS">
+                    <td><span class="rule-id">2.4.9</span></td>
+                    <td>Ensure High Availability configuration is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">HA section configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Firewall" data-status="PASS">
+                    <td><span class="rule-id">3.2</span></td>
+                    <td>Ensure policies do not use 'ALL' as Service</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">No policies use 'ALL' as service</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="2" data-category="Firewall" data-status="FAIL">
+                    <td><span class="rule-id">3.3</span></td>
+                    <td>Ensure Tor and malicious traffic is blocked using ISDB</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">No explicit Tor/malicious traffic blocking found</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Firewall" data-status="PASS">
+                    <td><span class="rule-id">3.4</span></td>
+                    <td>Ensure logging is enabled on all firewall policies</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Logging enabled on all 1 policies</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="2" data-category="Security Profiles" data-status="FAIL">
+                    <td><span class="rule-id">4.1.1</span></td>
+                    <td>Ensure Botnet connections are detected</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">Botnet connection scanning not enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.1.2</span></td>
+                    <td>Ensure IPS Security Profile is applied to policies</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">IPS sensor configured</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="1" data-category="Security Profiles" data-status="FAIL">
+                    <td><span class="rule-id">4.2.1</span></td>
+                    <td>Ensure Antivirus Definition Push Updates are configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">Antivirus configured but updates not scheduled</td>
+                </tr>
+                <tr class="status-fail" data-severity="Medium" data-level="1" data-category="Security Profiles" data-status="FAIL">
+                    <td><span class="rule-id">4.2.3</span></td>
+                    <td>Ensure Outbreak Prevention Database is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">Outbreak prevention not enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.2.4</span></td>
+                    <td>Ensure AI/heuristic-based malware detection is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">AI/ML malware detection enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.2.5</span></td>
+                    <td>Ensure Grayware detection on antivirus is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Grayware/botnet detection enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="2" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.2.6</span></td>
+                    <td>Ensure inline scanning with sandbox is enabled</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Sandbox integration configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.3.1</span></td>
+                    <td>Ensure Botnet C&C Domain Blocking DNS Filter is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Botnet C&C domain blocking enabled</td>
+                </tr>
+                <tr class="status-fail" data-severity="Medium" data-level="2" data-category="Security Profiles" data-status="FAIL">
+                    <td><span class="rule-id">4.3.2</span></td>
+                    <td>Ensure logging is enabled on DNS Filter</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">DNS filter logging not fully enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="2" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.3.4</span></td>
+                    <td>Ensure high-risk web categories are blocked</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Web filter blocking rules configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="2" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.4.2</span></td>
+                    <td>Ensure logging is enabled on Application Control</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Application control configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.4.3</span></td>
+                    <td>Ensure Application Control Security Profile is applied</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Application control configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="2" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.5.1</span></td>
+                    <td>Ensure SSL/SSH inspection is configured</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">SSL/SSH inspection profiles configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="2" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.5.2</span></td>
+                    <td>Ensure Web Filtering is enabled</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Web filtering configured</td>
+                </tr>
+                <tr class="status-fail" data-severity="Medium" data-level="2" data-category="Security Profiles" data-status="FAIL">
+                    <td><span class="rule-id">4.5.3</span></td>
+                    <td>Ensure Content Disarm & Reconstruction is enabled</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">CDR not explicitly enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="2" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.5.4</span></td>
+                    <td>Ensure Email Filtering is configured</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Email filtering configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="2" data-category="Security Profiles" data-status="PASS">
+                    <td><span class="rule-id">4.5.5</span></td>
+                    <td>Ensure File Filtering is configured</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">File filtering configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Security Fabric" data-status="PASS">
+                    <td><span class="rule-id">5.1.1</span></td>
+                    <td>Ensure Compromised Host Quarantine is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Compromised host quarantine enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Security Fabric" data-status="PASS">
+                    <td><span class="rule-id">5.2.1.1</span></td>
+                    <td>Ensure Security Fabric is configured</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Security Fabric enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="2" data-category="VPN" data-status="PASS">
+                    <td><span class="rule-id">6.1.1</span></td>
+                    <td>Ensure trusted signed certificate is used for VPN portal</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Custom VPN certificate configured</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="2" data-category="VPN" data-status="FAIL">
+                    <td><span class="rule-id">6.1.2</span></td>
+                    <td>Ensure limited TLS versions for SSL VPN</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">SSL VPN TLS version: not restricted</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="2" data-category="VPN" data-status="FAIL">
+                    <td><span class="rule-id">6.2.1</span></td>
+                    <td>Ensure IPsec VPN uses AES-256 encryption</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">IPsec encryption: not AES-256</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="2" data-category="VPN" data-status="FAIL">
+                    <td><span class="rule-id">6.2.2</span></td>
+                    <td>Ensure IPsec VPN uses strong DH group</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">IPsec DH group may be weak</td>
+                </tr>
+                <tr class="status-pass" data-severity="High" data-level="1" data-category="Logging" data-status="PASS">
+                    <td><span class="rule-id">7.1.1</span></td>
+                    <td>Ensure Event Logging is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Event logging configured</td>
+                </tr>
+                <tr class="status-fail" data-severity="High" data-level="2" data-category="Logging" data-status="FAIL">
+                    <td><span class="rule-id">7.2.1</span></td>
+                    <td>Ensure logs sent to FortiAnalyzer/FortiManager are encrypted</td>
+                    <td><span class="badge badge-level">L2</span></td>
+                    <td><span class="badge badge-high">High</span></td>
+                    <td><span class="status-badge status-fail">FAIL</span></td>
+                    <td class="actual-value">Log encryption not configured</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Logging" data-status="PASS">
+                    <td><span class="rule-id">7.2.2</span></td>
+                    <td>Ensure Log Transmission to FortiAnalyzer/FortiManager is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">FortiAnalyzer logging enabled</td>
+                </tr>
+                <tr class="status-pass" data-severity="Medium" data-level="1" data-category="Logging" data-status="PASS">
+                    <td><span class="rule-id">7.3.1</span></td>
+                    <td>Ensure Centralized Logging and Reporting (Syslog) is enabled</td>
+                    <td><span class="badge badge-level">L1</span></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td class="actual-value">Syslog logging enabled</td>
+                </tr></tbody>
+        </table>
+    </div>
+
+    <div class="report-footer">
+        FortiGate CIS Benchmark Checker v2.0.0 &bull; CIS FortiGate Benchmark v1.3.0 &bull; Generated 2026-11-05 17:20:40
+    </div>
+</div>
+
+<script>
+let currentStatusFilter = 'all';
+let currentSeverityFilter = 'all';
+
+function filterTable(query) {
+    const rows = document.querySelectorAll('#allControlsTable tbody tr');
+    const q = query.toLowerCase();
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const matchText = !q || text.includes(q);
+        const status = row.dataset.status;
+        const severity = row.dataset.severity;
+        const matchStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
+        const matchSev = currentSeverityFilter === 'all' || severity === currentSeverityFilter;
+        row.style.display = matchText && matchStatus && matchSev ? '' : 'none';
+    });
+}
+
+function filterStatus(status, btn) {
+    currentStatusFilter = status;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterTable(document.getElementById('searchInput').value);
+}
+
+function filterSeverity(severity, btn) {
+    currentSeverityFilter = severity === currentSeverityFilter ? 'all' : severity;
+    filterTable(document.getElementById('searchInput').value);
+}
+</script>
+</body>
+</html>

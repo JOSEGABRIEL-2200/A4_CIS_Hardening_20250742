@@ -1,0 +1,14 @@
+{
+  "modo": "aplicar",
+  "fecha": "2026-11-05 16:55:08",
+  "equipos": [
+    {
+      "nombre": "FGT1",
+      "ip": "10.7.42.146",
+      "tipo": "fortios",
+      "rol": "firewall",
+      "error": "ReadTimeout: Pattern not detected: 'to accept|[#$]' in output.",
+      "benchmark": "CIS Fortinet FortiGate 7.0.x Benchmark v1.3.0"
+    }
+  ]
+}

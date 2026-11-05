@@ -1,0 +1,193 @@
+Building configuration...
+
+  
+Current configuration : 2891 bytes
+!
+! Last configuration change at 18:36:57 UTC Thu Nov 5 2026 by admin
+!
+version 15.7
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging buffered 64000
+logging console critical
+enable secret 9 <OCULTO>
+!
+aaa new-model
+!
+!
+aaa authentication login default local
+aaa authentication login LOGIN-LOCAL local
+aaa authentication enable default enable
+aaa authorization exec default local 
+!
+!
+!
+!
+!
+aaa session-id common
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+no ip source-route
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+ip dhcp excluded-address 10.7.42.1 10.7.42.9
+!
+ip dhcp pool LAN-VLAN10
+ network 10.7.42.0 255.255.255.128
+ default-router 10.7.42.1 
+!
+ip dhcp pool AUDITOR
+ host 10.7.42.10 255.255.255.128
+ client-identifier 0100.0c29.a89b.d3
+ default-router 10.7.42.1 
+!
+!
+!
+no ip bootp server
+ip domain name jose.gabriel
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+username admin secret 9 <OCULTO>
+!
+redundancy
+!
+no cdp run
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description WAN-FGT1-port2
+ ip address 10.7.42.145 255.255.255.252
+ no ip proxy-arp
+ duplex auto
+!
+interface Ethernet0/1
+ description TRUNK-SW1-e0/0
+ no ip address
+ duplex auto
+!
+interface Ethernet0/1.10
+ description VLAN10-LAN
+ encapsulation dot1Q 10
+ ip address 10.7.42.1 255.255.255.128
+ no ip proxy-arp
+!
+interface Ethernet0/1.99
+ description VLAN99-GESTION
+ encapsulation dot1Q 99
+ ip address 10.7.42.137 255.255.255.248
+ no ip proxy-arp
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+ duplex auto
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 10.7.42.146
+ip ssh time-out 60
+ip ssh version 2
+!
+ip access-list standard ACL-GESTION-SSH
+ remark Solo la estacion de gestion entra por SSH
+ permit 10.7.42.10
+ deny   any log
+!
+logging source-interface Ethernet0/1.10
+logging host 10.7.42.10
+ipv6 ioam timestamp
+!
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+banner exec ^CACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [R1 - exec]^C
+banner login ^CACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [R1 - login]^C
+banner motd ^CACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [R1 - motd]^C
+!
+line con 0
+ exec-timeout 5 0
+ logging synchronous
+ login authentication LOGIN-LOCAL
+line aux 0
+ exec-timeout 5 0
+ no exec
+line vty 0 4
+ access-class ACL-GESTION-SSH in
+ exec-timeout 5 0
+ login authentication LOGIN-LOCAL
+ transport input ssh
+!
+!
+end

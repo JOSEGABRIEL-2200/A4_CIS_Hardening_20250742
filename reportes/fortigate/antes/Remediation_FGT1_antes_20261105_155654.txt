@@ -1,0 +1,285 @@
+# ============================================================
+# FortiGate CIS Benchmark Remediation Script
+# Generated: 2026-11-05 15:56:54
+# Mode: DRY-RUN (Preview Only)
+# Total Remediation Commands: 24
+# ============================================================
+#
+# WARNING: Review each command carefully before applying.
+# Test in a lab environment first.
+# Ensure you have a configuration backup.
+#
+# Usage:
+#   1. Connect to FortiGate CLI (SSH or Console)
+#   2. Paste commands one section at a time
+#   3. Verify changes with 'get system status'
+#
+# ============================================================
+
+# === DRY-RUN MODE ===
+# Commands are shown for review only. No changes will be applied.
+# Remove '# [DRY-RUN]' prefix to enable execution.
+
+
+# ============================================================
+# Category: Admin
+# ============================================================
+
+# Rule 2.4.11: Ensure HA Reserved Management Interface is configured
+# Severity: Medium
+# Current: HA reserved management interface not configured
+# Expected: HA management interface configured
+# [DRY-RUN] config system ha
+# [DRY-RUN]   set ha-mgmt-status enable
+# [DRY-RUN]   config ha-mgmt-interfaces
+# [DRY-RUN]     edit 1
+# [DRY-RUN]       set interface <mgmt_port>
+# [DRY-RUN]       set gateway <gateway_ip>
+# [DRY-RUN]     next
+# [DRY-RUN]   end
+# [DRY-RUN] end
+
+# Rule 2.4.4: Ensure idle timeout time is configured
+# Severity: Medium
+# Current: Admin timeout too long: 30 minutes
+# Expected: Admin timeout ≤ 15 minutes
+# [DRY-RUN] config system global
+# [DRY-RUN]   set admintimeout 10
+# [DRY-RUN] end
+
+# Rule 2.4.5: Ensure only encrypted access channels are enabled
+# Severity: Critical
+# Current: HTTPS redirect not enabled
+# Expected: SSH v1 disabled, HTTPS redirect enabled
+# [DRY-RUN] config system global
+# [DRY-RUN]   set admin-ssh-v1 disable
+# [DRY-RUN]   set admin-https-redirect enable
+# [DRY-RUN] end
+
+# Rule 2.4.7: Ensure default Admin ports are changed
+# Severity: Medium
+# Current: Default ports in use: HTTP port=80, HTTPS port=443, SSH port=22
+# Expected: Non-default admin ports
+# [DRY-RUN] config system global
+# [DRY-RUN]   set admin-port 8080
+# [DRY-RUN]   set admin-sport 8443
+# [DRY-RUN]   set admin-ssh-port 2222
+# [DRY-RUN] end
+
+
+# ============================================================
+# Category: Firewall
+# ============================================================
+
+# Rule 3.2: Ensure policies do not use 'ALL' as Service
+# Severity: High
+# Current: 1 policies use 'ALL' as service
+# Expected: No policies with service=ALL
+# [DRY-RUN] config firewall policy
+# [DRY-RUN]   edit <policy_id>
+# [DRY-RUN]     set service <specific_services>
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+# Rule 3.3: Ensure Tor and malicious traffic is blocked using ISDB
+# Severity: High
+# Current: No explicit Tor/malicious traffic blocking found
+# Expected: Tor/malicious ISDB blocking configured
+# [DRY-RUN] config firewall policy
+# [DRY-RUN]   edit <id>
+# [DRY-RUN]     set internet-service enable
+# [DRY-RUN]     set internet-service-id <tor_isdb_id>
+# [DRY-RUN]     set action deny
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+# Rule 3.4: Ensure logging is enabled on all firewall policies
+# Severity: Medium
+# Current: Logging: 0/1 policies
+# Expected: Logging enabled on all policies
+# [DRY-RUN] config firewall policy
+# [DRY-RUN]   edit <policy_id>
+# [DRY-RUN]     set logtraffic all
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+
+# ============================================================
+# Category: Logging
+# ============================================================
+
+# Rule 7.2.1: Ensure logs sent to FortiAnalyzer/FortiManager are encrypted
+# Severity: High
+# Current: Log encryption not configured
+# Expected: Log encryption enabled
+# [DRY-RUN] config log fortianalyzer setting
+# [DRY-RUN]   set enc-algorithm high
+# [DRY-RUN] end
+
+
+# ============================================================
+# Category: Network
+# ============================================================
+
+# Rule 1.2: Ensure intra-zone traffic is restricted
+# Severity: High
+# Current: intra-zone-deny: not set
+# Expected: intra-zone-deny: enable
+# [DRY-RUN] config system global
+# [DRY-RUN]   set intra-zone-deny enable
+# [DRY-RUN] end
+
+# Rule 1.3: Ensure management services are disabled on WAN port
+# Severity: Critical
+# Current: Insecure services: port1: http, fgfm
+# Expected: No insecure management services on WAN ports
+# [DRY-RUN] config system interface
+# [DRY-RUN]   edit <wan_port>
+# [DRY-RUN]     set allowaccess ping https ssh
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+
+# ============================================================
+# Category: SNMP
+# ============================================================
+
+# Rule 2.3.1: Ensure only SNMPv3 is enabled
+# Severity: High
+# Current: SNMP configured but v3-only not enabled
+# Expected: SNMPv3 only
+# [DRY-RUN] config system snmp sysinfo
+# [DRY-RUN]   set status enable
+# [DRY-RUN] end
+
+
+# ============================================================
+# Category: Security Profiles
+# ============================================================
+
+# Rule 4.1.1: Ensure Botnet connections are detected
+# Severity: High
+# Current: Botnet connection scanning not enabled
+# Expected: Botnet scanning enabled
+# [DRY-RUN] config system interface
+# [DRY-RUN]   edit <interface>
+# [DRY-RUN]     set scan-botnet-connections block
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+# Rule 4.2.1: Ensure Antivirus Definition Push Updates are configured
+# Severity: High
+# Current: Antivirus configured but updates not scheduled
+# Expected: AV update schedule configured
+# [DRY-RUN] config antivirus settings
+# [DRY-RUN]   set default-db extended
+# [DRY-RUN] end
+
+# Rule 4.2.3: Ensure Outbreak Prevention Database is enabled
+# Severity: Medium
+# Current: Outbreak prevention not enabled
+# Expected: Outbreak prevention enabled
+# [DRY-RUN] config antivirus profile
+# [DRY-RUN]   edit <profile_name>
+# [DRY-RUN]     set outbreak-prevention enable
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+# Rule 4.3.2: Ensure logging is enabled on DNS Filter
+# Severity: Medium
+# Current: DNS filter logging not fully enabled
+# Expected: DNS filter logging enabled
+# [DRY-RUN] config dnsfilter profile
+# [DRY-RUN]   edit <profile_name>
+# [DRY-RUN]     set log-all-domain enable
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+
+# ============================================================
+# Category: System
+# ============================================================
+
+# Rule 2.1.1: Ensure Pre-Login Banner is set
+# Severity: Medium
+# Current: pre-login-banner: disable
+# Expected: pre-login-banner: enable
+# [DRY-RUN] config system global
+# [DRY-RUN]   set pre-login-banner enable
+# [DRY-RUN] end
+
+# Rule 2.1.11: Ensure CDN is enabled for improved GUI performance
+# Severity: Low
+# Current: gui-cdn: not set
+# Expected: gui-cdn: enable
+# [DRY-RUN] config system global
+# [DRY-RUN]   set gui-cdn enable
+# [DRY-RUN] end
+
+# Rule 2.1.2: Ensure Post-Login Banner is set
+# Severity: Medium
+# Current: post-login-banner: disable
+# Expected: post-login-banner: enable
+# [DRY-RUN] config system global
+# [DRY-RUN]   set post-login-banner enable
+# [DRY-RUN] end
+
+# Rule 2.1.7: Ensure USB firmware and configuration installation is disabled
+# Severity: High
+# Current: usb-auto-install not explicitly set (defaults to enable)
+# Expected: usb-auto-install: disable
+# [DRY-RUN] config system global
+# [DRY-RUN]   set usb-auto-install disable
+# [DRY-RUN] end
+
+# Rule 2.1.8: Ensure static keys for TLS are disabled
+# Severity: High
+# Current: strong-crypto: not set
+# Expected: strong-crypto: enable
+# [DRY-RUN] config system global
+# [DRY-RUN]   set strong-crypto enable
+# [DRY-RUN] end
+
+# Rule 2.1.9: Ensure Global Strong Encryption is enabled
+# Severity: Critical
+# Current: strong-crypto: not set
+# Expected: strong-crypto: enable
+# [DRY-RUN] config system global
+# [DRY-RUN]   set strong-crypto enable
+# [DRY-RUN] end
+
+
+# ============================================================
+# Category: VPN
+# ============================================================
+
+# Rule 6.1.2: Ensure limited TLS versions for SSL VPN
+# Severity: High
+# Current: SSL VPN TLS version: not restricted
+# Expected: TLS 1.2+
+# [DRY-RUN] config vpn ssl settings
+# [DRY-RUN]   set ssl-min-proto-ver tls1-2
+# [DRY-RUN] end
+
+# Rule 6.2.1: Ensure IPsec VPN uses AES-256 encryption
+# Severity: High
+# Current: IPsec encryption: not AES-256
+# Expected: AES-256 encryption
+# [DRY-RUN] config vpn ipsec phase1-interface
+# [DRY-RUN]   edit <tunnel>
+# [DRY-RUN]     set proposal aes256-sha256
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+# Rule 6.2.2: Ensure IPsec VPN uses strong DH group
+# Severity: High
+# Current: IPsec DH group may be weak
+# Expected: DH group ≥ 14
+# [DRY-RUN] config vpn ipsec phase1-interface
+# [DRY-RUN]   edit <tunnel>
+# [DRY-RUN]     set dhgrp 14 19 20 21
+# [DRY-RUN]   next
+# [DRY-RUN] end
+
+
+# === END OF REMEDIATION SCRIPT ===

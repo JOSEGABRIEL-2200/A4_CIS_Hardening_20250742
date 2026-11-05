@@ -1,0 +1,38 @@
+{
+  "_nota": "Inventario de la Asignacion 4. No lleva claves: el script las pide al ejecutarse.",
+  "parametros": {
+    "host_gestion": "10.7.42.10",
+    "syslog": "10.7.42.10",
+    "banner": "ACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada.",
+    "zona_horaria_fgt": "15"
+  },
+  "equipos": [
+    {
+      "nombre": "R1",
+      "ip": "10.7.42.1",
+      "tipo": "ios",
+      "rol": "router",
+      "usuario": "admin",
+      "credencial": "cisco",
+      "interfaz_origen_log": "Ethernet0/1.10"
+    },
+    {
+      "nombre": "SW1",
+      "ip": "10.7.42.138",
+      "tipo": "ios",
+      "rol": "switch",
+      "usuario": "admin",
+      "credencial": "cisco",
+      "interfaz_origen_log": "Vlan99"
+    },
+    {
+      "nombre": "FGT1",
+      "ip": "10.7.42.146",
+      "tipo": "fortios",
+      "rol": "firewall",
+      "usuario": "admin",
+      "credencial": "fortigate",
+      "puerto_wan": "port1"
+    }
+  ]
+}

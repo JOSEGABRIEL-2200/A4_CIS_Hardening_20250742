@@ -1,0 +1,114 @@
+<!doctype html><html lang='es'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Informe CIS - 2026-11-05 16:53:34</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1f2937;--muted:#6b7280;--ok:#15803d;--okbg:#dcfce7;--bad:#b91c1c;
+--badbg:#fee2e2;--exc:#92400e;--excbg:#fef3c7;--line:#e5e7eb;--acc:#1d4ed8}
+@media (prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#111827;--ink:#e5e7eb;--muted:#9ca3af;--ok:#4ade80;
+--okbg:#14532d;--bad:#f87171;--badbg:#7f1d1d;--exc:#fbbf24;--excbg:#78350f;--line:#374151;--acc:#93c5fd}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,Segoe UI,Arial,sans-serif}
+main{max-width:1150px;margin:0 auto;padding:24px 16px}h1{font-size:22px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px}
+.sub{color:var(--muted);margin:0 0 18px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:12px 0}
+.kpis{display:flex;flex-wrap:wrap;gap:10px}.kpi{flex:1 1 80px;border:1px solid var(--line);border-radius:8px;padding:10px}
+.kpi b{display:block;font-size:22px}.kpi span{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:7px 8px;border-top:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}.est{font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;display:inline-block}
+.CUMPLE{color:var(--ok);background:var(--okbg)}.NO{color:var(--bad);background:var(--badbg)}.EXCEPCION,.ERROR{color:var(--exc);background:var(--excbg)}
+code,pre{font-family:ui-monospace,Consolas,monospace;font-size:12px}pre{white-space:pre-wrap;margin:0}
+.porque{color:var(--muted);font-size:12px}.wrap{overflow-x:auto}
+.grupos{display:flex;flex-wrap:wrap;gap:16px}.grupo{flex:1 1 320px}.grupo h3{font-size:13px;margin:0 0 8px;color:var(--muted);
+text-transform:uppercase;letter-spacing:.04em}.big{font-weight:700}
+</style></head><body><main>
+<h1>Informe de hardening CIS</h1>
+<p class='sub'>Aplicacion de reglas con informe antes/despues · 2026-11-05 16:53:34 · Asignacion 4 · Jose Gabriel Feliz Maria (2025-0742)</p>
+<div class='card wrap'><table><tr><th>Equipo</th><th>Rol</th><th>Benchmark</th><th>Cumplimiento</th></tr><tr><td class='big'>FGT1</td><td>firewall</td><td>CIS Fortinet FortiGate 7.0.x Benchmark v1.3.0</td><td class='big'>12%</td></tr></table><p class='porque'>Cumplimiento = cumple / (cumple + no cumple). Las excepciones documentadas no cuentan.</p></div>
+<h2>FGT1 · 10.7.42.146 · firewall</h2>
+<p class='sub'>CIS Fortinet FortiGate 7.0.x Benchmark v1.3.0</p>
+<div class='card'><b>Error:</b> ReadTimeout: Pattern not detected: &#x27;to accept|[#$]&#x27; in output.</div>
+<div class='card'><div class='grupos'>
+<div class="grupo"><h3>Estado actual</h3><div class="kpis"><div class="kpi"><b>12%</b><span>cumplimiento</span></div><div class="kpi"><b>2</b><span>cumple</span></div><div class="kpi"><b>14</b><span>no cumple</span></div><div class="kpi"><b>2</b><span>excepcion</span></div><div class="kpi"><b>0</b><span>error</span></div></div></div>
+</div></div>
+<div class='card wrap'><table><tr><th>CIS</th><th>Recomendacion</th><th>Nivel</th><th>Estado</th><th>Evidencia</th><th>Remediacion</th></tr>
+<tr><td><code>2.1.5</code></td><td>Ensure hostname is set<div class='porque'>Identifica el equipo en registros y en la gestion (el nombre de fabrica no dice nada).</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>hostname FortiGate-VM64-KVM (nombre de fabrica)</code></td><td><code>config system global<br>set hostname &quot;FGT1&quot;<br>end</code></td></tr>
+<tr><td><code>2.1.1</code></td><td>Ensure &#x27;Pre-Login Banner&#x27; is set<div class='porque'>Aviso legal antes de iniciar sesion.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>pre-login-banner disable (sin aviso antes del login)</code></td><td><code>config system global<br>set pre-login-banner enable<br>end</code></td></tr>
+<tr><td><code>2.1.2</code></td><td>Ensure &#x27;Post-Login-Banner&#x27; is set<div class='porque'>Aviso despues de iniciar sesion.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>post-login-banner disable (sin aviso despues del login)</code></td><td><code>config system global<br>set post-login-banner enable<br>end</code></td></tr>
+<tr><td><code>2.1.3</code></td><td>Ensure timezone is properly configured<div class='porque'>Los registros tienen que tener la hora local correcta para poder cruzarlos con los demas equipos.</div></td><td>1</td><td><span class="est EXCEPCION">EXCEPCION</span></td><td><code>timezone 04 (sin zona definida en el inventario)</code></td><td><code>—</code></td></tr>
+<tr><td><code>2.1.4</code></td><td>Ensure correct system time is configured through NTP<div class='porque'>Hora sincronizada para que los registros sean confiables.</div></td><td>1</td><td><span class="est CUMPLE">CUMPLE</span></td><td><code>ntpsync enable (fortiguard)</code></td><td><code>—</code></td></tr>
+<tr><td><code>2.1.7</code></td><td>Disable USB Firmware and configuration installation<div class='porque'>Nadie puede cambiar el firmware o la configuracion conectando una memoria USB.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>auto-install-config enable, auto-install-image enable</code></td><td><code>config system auto-install<br>set auto-install-config disable<br>set auto-install-image disable<br>end</code></td></tr>
+<tr><td><code>2.1.9</code></td><td>Enable Global Strong Encryption<div class='porque'>Solo cifrados fuertes en HTTPS, SSH y VPN.</div></td><td>1</td><td><span class="est EXCEPCION">EXCEPCION</span></td><td><code>la licencia de evaluacion (cifrado bajo) no tiene &#x27;strong-crypto&#x27;</code></td><td><code>—</code></td></tr>
+<tr><td><code>2.1.10</code></td><td>Ensure management GUI listens on secure TLS version<div class='porque'>La interfaz web no acepta TLS 1.0/1.1.</div></td><td>1</td><td><span class="est CUMPLE">CUMPLE</span></td><td><code>admin-https-ssl-versions tlsv1-2</code></td><td><code>—</code></td></tr>
+<tr><td><code>2.2.1</code></td><td>Ensure &#x27;Password Policy&#x27; is enabled<div class='porque'>Claves de administrador largas y complejas (12 caracteres, mayuscula, minuscula, numero y simbolo).</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>password-policy disable, minimum-length 0</code></td><td><code>config system password-policy<br>set status enable<br>set apply-to admin-password<br>set minimum-length 12<br>set min-lower-case-letter 1<br>set min-upper-case-letter 1<br>set min-non-alphanumeric 1<br>set min-number 1<br>set expire-status enable<br>set expire-day 90<br>end</code></td></tr>
+<tr><td><code>2.2.2</code></td><td>Ensure administrator password retries and lockout time are configured<div class='porque'>Tras 3 intentos fallidos la cuenta se bloquea 15 minutos (contra fuerza bruta).</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>threshold 3, duration 60s (CIS: 3 intentos y 900 s)</code></td><td><code>config system global<br>set admin-lockout-threshold 3<br>set admin-lockout-duration 900<br>end</code></td></tr>
+<tr><td><code>2.4.2</code></td><td>Ensure all the login accounts having specific trusted hosts enabled<div class='porque'>El administrador solo puede entrar desde la estacion de gestion 10.7.42.10.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>administradores sin trusted hosts (entran desde cualquier IP): admin</code></td><td><code>config system admin<br>edit &quot;admin&quot;<br>set trusthost1 10.7.42.10 255.255.255.255<br>next<br>end</code></td></tr>
+<tr><td><code>2.4.4</code></td><td>Ensure idle timeout time is configured<div class='porque'>Una sesion de administracion olvidada se cierra a los 5 minutos.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>admintimeout 30 min</code></td><td><code>config system global<br>set admintimeout 5<br>end</code></td></tr>
+<tr><td><code>2.4.5</code></td><td>Ensure only encrypted access channels are enabled<div class='porque'>HTTP y Telnet mandan la clave en texto plano: solo HTTPS y SSH.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>acceso sin cifrar en port1: http; port2: http telnet</code></td><td><code>config system interface<br>edit &quot;port1&quot;<br>set allowaccess ping https ssh fgfm<br>next<br>edit &quot;port2&quot;<br>set allowaccess ping https ssh<br>next<br>end</code></td></tr>
+<tr><td><code>2.4.7</code></td><td>Ensure default Admin ports are changed<div class='porque'>La interfaz web pasa del 443 al 8443 para no estar en el puerto que todos escanean. (SSH se deja en 22 porque lo usan las herramientas de auditoria.)</div></td><td>2</td><td><span class="est NO">NO CUMPLE</span></td><td><code>admin-sport 443 (puerto por defecto)</code></td><td><code>config system global<br>set admin-sport 8443<br>end</code></td></tr>
+<tr><td><code>1.3</code></td><td>Disable all management related services on WAN port<div class='porque'>Nadie desde Internet puede llegar a la administracion del firewall.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>port1 (WAN) permite administracion: fgfm http https ssh</code></td><td><code>config system interface<br>edit &quot;port1&quot;<br>set allowaccess ping<br>next<br>end</code></td></tr>
+<tr><td><code>3.2</code></td><td>Ensure that policies do not use &#x27;ALL&#x27; as Service<div class='porque'>La LAN solo sale por los servicios que necesita (HTTP, HTTPS, DNS y ping).</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>usan ALL: politica 1</code></td><td><code>config firewall policy<br>edit 1<br>set service &quot;HTTP&quot; &quot;HTTPS&quot; &quot;DNS&quot; &quot;PING&quot;<br>next<br>end</code></td></tr>
+<tr><td><code>3.4</code></td><td>Ensure firewall policy is logging<div class='porque'>Todo el trafico permitido queda registrado.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>sin registro: politica 1</code></td><td><code>config firewall policy<br>edit 1<br>set logtraffic all<br>next<br>end</code></td></tr>
+<tr><td><code>7.3.1</code></td><td>Ensure Syslog is enabled (centralized logging)<div class='porque'>Los registros se envian al servidor syslog (el Kali), fuera del firewall.</div></td><td>1</td><td><span class="est NO">NO CUMPLE</span></td><td><code>syslog disable</code></td><td><code>config log syslogd setting<br>set status enable<br>set server 10.7.42.10<br>end</code></td></tr>
+</table></div>
+<div class='card'><b>Comandos aplicados</b><pre>config system global
+set hostname &quot;FGT1&quot;
+end
+config system global
+set pre-login-banner enable
+end
+config system global
+set post-login-banner enable
+end
+config system auto-install
+set auto-install-config disable
+set auto-install-image disable
+end
+config system password-policy
+set status enable
+set apply-to admin-password
+set minimum-length 12
+set min-lower-case-letter 1
+set min-upper-case-letter 1
+set min-non-alphanumeric 1
+set min-number 1
+set expire-status enable
+set expire-day 90
+end
+config system global
+set admin-lockout-threshold 3
+set admin-lockout-duration 900
+end
+config system admin
+edit &quot;admin&quot;
+set trusthost1 10.7.42.10 255.255.255.255
+next
+end
+config system global
+set admintimeout 5
+end
+config system interface
+edit &quot;port1&quot;
+set allowaccess ping https ssh fgfm
+next
+edit &quot;port2&quot;
+set allowaccess ping https ssh
+next
+end
+config system global
+set admin-sport 8443
+end
+config system interface
+edit &quot;port1&quot;
+set allowaccess ping
+next
+end
+config firewall policy
+edit 1
+set service &quot;HTTP&quot; &quot;HTTPS&quot; &quot;DNS&quot; &quot;PING&quot;
+next
+end
+config firewall policy
+edit 1
+set logtraffic all
+next
+end
+config log syslogd setting
+set status enable
+set server 10.7.42.10
+end</pre></div>
+</main></body></html>

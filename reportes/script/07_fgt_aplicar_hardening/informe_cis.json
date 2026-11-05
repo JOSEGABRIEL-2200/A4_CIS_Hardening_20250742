@@ -1,0 +1,351 @@
+{
+  "modo": "aplicar",
+  "fecha": "2026-11-05 16:53:34",
+  "equipos": [
+    {
+      "nombre": "FGT1",
+      "ip": "10.7.42.146",
+      "tipo": "fortios",
+      "rol": "firewall",
+      "error": "ReadTimeout: Pattern not detected: 'to accept|[#$]' in output.",
+      "benchmark": "CIS Fortinet FortiGate 7.0.x Benchmark v1.3.0",
+      "antes": [
+        {
+          "id": "2.1.5",
+          "titulo": "Ensure hostname is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "NO CUMPLE",
+          "evidencia": "hostname FortiGate-VM64-KVM (nombre de fabrica)",
+          "por_que": "Identifica el equipo en registros y en la gestion (el nombre de fabrica no dice nada).",
+          "remediacion": [
+            "config system global",
+            "set hostname \"FGT1\"",
+            "end"
+          ]
+        },
+        {
+          "id": "2.1.1",
+          "titulo": "Ensure 'Pre-Login Banner' is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "NO CUMPLE",
+          "evidencia": "pre-login-banner disable (sin aviso antes del login)",
+          "por_que": "Aviso legal antes de iniciar sesion.",
+          "remediacion": [
+            "config system global",
+            "set pre-login-banner enable",
+            "end"
+          ]
+        },
+        {
+          "id": "2.1.2",
+          "titulo": "Ensure 'Post-Login-Banner' is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "NO CUMPLE",
+          "evidencia": "post-login-banner disable (sin aviso despues del login)",
+          "por_que": "Aviso despues de iniciar sesion.",
+          "remediacion": [
+            "config system global",
+            "set post-login-banner enable",
+            "end"
+          ]
+        },
+        {
+          "id": "2.1.3",
+          "titulo": "Ensure timezone is properly configured",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "EXCEPCION",
+          "evidencia": "timezone 04 (sin zona definida en el inventario)",
+          "por_que": "Los registros tienen que tener la hora local correcta para poder cruzarlos con los demas equipos.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.4",
+          "titulo": "Ensure correct system time is configured through NTP",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "ntpsync enable (fortiguard)",
+          "por_que": "Hora sincronizada para que los registros sean confiables.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.7",
+          "titulo": "Disable USB Firmware and configuration installation",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "NO CUMPLE",
+          "evidencia": "auto-install-config enable, auto-install-image enable",
+          "por_que": "Nadie puede cambiar el firmware o la configuracion conectando una memoria USB.",
+          "remediacion": [
+            "config system auto-install",
+            "set auto-install-config disable",
+            "set auto-install-image disable",
+            "end"
+          ]
+        },
+        {
+          "id": "2.1.9",
+          "titulo": "Enable Global Strong Encryption",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "EXCEPCION",
+          "evidencia": "la licencia de evaluacion (cifrado bajo) no tiene 'strong-crypto'",
+          "por_que": "Solo cifrados fuertes en HTTPS, SSH y VPN.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.10",
+          "titulo": "Ensure management GUI listens on secure TLS version",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "admin-https-ssl-versions tlsv1-2",
+          "por_que": "La interfaz web no acepta TLS 1.0/1.1.",
+          "remediacion": []
+        },
+        {
+          "id": "2.2.1",
+          "titulo": "Ensure 'Password Policy' is enabled",
+          "nivel": 1,
+          "seccion": "Politica de contrasenas",
+          "estado": "NO CUMPLE",
+          "evidencia": "password-policy disable, minimum-length 0",
+          "por_que": "Claves de administrador largas y complejas (12 caracteres, mayuscula, minuscula, numero y simbolo).",
+          "remediacion": [
+            "config system password-policy",
+            "set status enable",
+            "set apply-to admin-password",
+            "set minimum-length 12",
+            "set min-lower-case-letter 1",
+            "set min-upper-case-letter 1",
+            "set min-non-alphanumeric 1",
+            "set min-number 1",
+            "set expire-status enable",
+            "set expire-day 90",
+            "end"
+          ]
+        },
+        {
+          "id": "2.2.2",
+          "titulo": "Ensure administrator password retries and lockout time are configured",
+          "nivel": 1,
+          "seccion": "Politica de contrasenas",
+          "estado": "NO CUMPLE",
+          "evidencia": "threshold 3, duration 60s (CIS: 3 intentos y 900 s)",
+          "por_que": "Tras 3 intentos fallidos la cuenta se bloquea 15 minutos (contra fuerza bruta).",
+          "remediacion": [
+            "config system global",
+            "set admin-lockout-threshold 3",
+            "set admin-lockout-duration 900",
+            "end"
+          ]
+        },
+        {
+          "id": "2.4.2",
+          "titulo": "Ensure all the login accounts having specific trusted hosts enabled",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "NO CUMPLE",
+          "evidencia": "administradores sin trusted hosts (entran desde cualquier IP): admin",
+          "por_que": "El administrador solo puede entrar desde la estacion de gestion 10.7.42.10.",
+          "remediacion": [
+            "config system admin",
+            "edit \"admin\"",
+            "set trusthost1 10.7.42.10 255.255.255.255",
+            "next",
+            "end"
+          ]
+        },
+        {
+          "id": "2.4.4",
+          "titulo": "Ensure idle timeout time is configured",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "NO CUMPLE",
+          "evidencia": "admintimeout 30 min",
+          "por_que": "Una sesion de administracion olvidada se cierra a los 5 minutos.",
+          "remediacion": [
+            "config system global",
+            "set admintimeout 5",
+            "end"
+          ]
+        },
+        {
+          "id": "2.4.5",
+          "titulo": "Ensure only encrypted access channels are enabled",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "NO CUMPLE",
+          "evidencia": "acceso sin cifrar en port1: http; port2: http telnet",
+          "por_que": "HTTP y Telnet mandan la clave en texto plano: solo HTTPS y SSH.",
+          "remediacion": [
+            "config system interface",
+            "edit \"port1\"",
+            "set allowaccess ping https ssh fgfm",
+            "next",
+            "edit \"port2\"",
+            "set allowaccess ping https ssh",
+            "next",
+            "end"
+          ]
+        },
+        {
+          "id": "2.4.7",
+          "titulo": "Ensure default Admin ports are changed",
+          "nivel": 2,
+          "seccion": "Administradores",
+          "estado": "NO CUMPLE",
+          "evidencia": "admin-sport 443 (puerto por defecto)",
+          "por_que": "La interfaz web pasa del 443 al 8443 para no estar en el puerto que todos escanean. (SSH se deja en 22 porque lo usan las herramientas de auditoria.)",
+          "remediacion": [
+            "config system global",
+            "set admin-sport 8443",
+            "end"
+          ]
+        },
+        {
+          "id": "1.3",
+          "titulo": "Disable all management related services on WAN port",
+          "nivel": 1,
+          "seccion": "Red",
+          "estado": "NO CUMPLE",
+          "evidencia": "port1 (WAN) permite administracion: fgfm http https ssh",
+          "por_que": "Nadie desde Internet puede llegar a la administracion del firewall.",
+          "remediacion": [
+            "config system interface",
+            "edit \"port1\"",
+            "set allowaccess ping",
+            "next",
+            "end"
+          ]
+        },
+        {
+          "id": "3.2",
+          "titulo": "Ensure that policies do not use 'ALL' as Service",
+          "nivel": 1,
+          "seccion": "Politicas de firewall",
+          "estado": "NO CUMPLE",
+          "evidencia": "usan ALL: politica 1",
+          "por_que": "La LAN solo sale por los servicios que necesita (HTTP, HTTPS, DNS y ping).",
+          "remediacion": [
+            "config firewall policy",
+            "edit 1",
+            "set service \"HTTP\" \"HTTPS\" \"DNS\" \"PING\"",
+            "next",
+            "end"
+          ]
+        },
+        {
+          "id": "3.4",
+          "titulo": "Ensure firewall policy is logging",
+          "nivel": 1,
+          "seccion": "Politicas de firewall",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin registro: politica 1",
+          "por_que": "Todo el trafico permitido queda registrado.",
+          "remediacion": [
+            "config firewall policy",
+            "edit 1",
+            "set logtraffic all",
+            "next",
+            "end"
+          ]
+        },
+        {
+          "id": "7.3.1",
+          "titulo": "Ensure Syslog is enabled (centralized logging)",
+          "nivel": 1,
+          "seccion": "Registros",
+          "estado": "NO CUMPLE",
+          "evidencia": "syslog disable",
+          "por_que": "Los registros se envian al servidor syslog (el Kali), fuera del firewall.",
+          "remediacion": [
+            "config log syslogd setting",
+            "set status enable",
+            "set server 10.7.42.10",
+            "end"
+          ]
+        }
+      ],
+      "resumen_antes": {
+        "CUMPLE": 2,
+        "NO CUMPLE": 14,
+        "EXCEPCION": 2,
+        "ERROR": 0,
+        "porcentaje": 12
+      },
+      "comandos_aplicados": [
+        "config system global",
+        "set hostname \"FGT1\"",
+        "end",
+        "config system global",
+        "set pre-login-banner enable",
+        "end",
+        "config system global",
+        "set post-login-banner enable",
+        "end",
+        "config system auto-install",
+        "set auto-install-config disable",
+        "set auto-install-image disable",
+        "end",
+        "config system password-policy",
+        "set status enable",
+        "set apply-to admin-password",
+        "set minimum-length 12",
+        "set min-lower-case-letter 1",
+        "set min-upper-case-letter 1",
+        "set min-non-alphanumeric 1",
+        "set min-number 1",
+        "set expire-status enable",
+        "set expire-day 90",
+        "end",
+        "config system global",
+        "set admin-lockout-threshold 3",
+        "set admin-lockout-duration 900",
+        "end",
+        "config system admin",
+        "edit \"admin\"",
+        "set trusthost1 10.7.42.10 255.255.255.255",
+        "next",
+        "end",
+        "config system global",
+        "set admintimeout 5",
+        "end",
+        "config system interface",
+        "edit \"port1\"",
+        "set allowaccess ping https ssh fgfm",
+        "next",
+        "edit \"port2\"",
+        "set allowaccess ping https ssh",
+        "next",
+        "end",
+        "config system global",
+        "set admin-sport 8443",
+        "end",
+        "config system interface",
+        "edit \"port1\"",
+        "set allowaccess ping",
+        "next",
+        "end",
+        "config firewall policy",
+        "edit 1",
+        "set service \"HTTP\" \"HTTPS\" \"DNS\" \"PING\"",
+        "next",
+        "end",
+        "config firewall policy",
+        "edit 1",
+        "set logtraffic all",
+        "next",
+        "end",
+        "config log syslogd setting",
+        "set status enable",
+        "set server 10.7.42.10",
+        "end"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,401 @@
+{
+  "modo": "aplicar",
+  "fecha": "2026-11-05 17:18:12",
+  "equipos": [
+    {
+      "nombre": "FGT1",
+      "ip": "10.7.42.146",
+      "tipo": "fortios",
+      "rol": "firewall",
+      "error": null,
+      "benchmark": "CIS Fortinet FortiGate 7.0.x Benchmark v1.3.0",
+      "antes": [
+        {
+          "id": "2.1.5",
+          "titulo": "Ensure hostname is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "hostname FGT1",
+          "por_que": "Identifica el equipo en registros y en la gestion (el nombre de fabrica no dice nada).",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1",
+          "titulo": "Ensure 'Pre-Login Banner' is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "pre-login-banner enable",
+          "por_que": "Aviso legal antes de iniciar sesion.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.2",
+          "titulo": "Ensure 'Post-Login-Banner' is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "post-login-banner enable",
+          "por_que": "Aviso despues de iniciar sesion.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.3",
+          "titulo": "Ensure timezone is properly configured",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "NO CUMPLE",
+          "evidencia": "timezone 04 (se espera 15)",
+          "por_que": "Los registros tienen que tener la hora local correcta para poder cruzarlos con los demas equipos.",
+          "remediacion": [
+            "config system global",
+            "set timezone 15",
+            "end"
+          ]
+        },
+        {
+          "id": "2.1.4",
+          "titulo": "Ensure correct system time is configured through NTP",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "ntpsync enable (fortiguard)",
+          "por_que": "Hora sincronizada para que los registros sean confiables.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.7",
+          "titulo": "Disable USB Firmware and configuration installation",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "auto-install-config/image disable",
+          "por_que": "Nadie puede cambiar el firmware o la configuracion conectando una memoria USB.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.9",
+          "titulo": "Enable Global Strong Encryption",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "EXCEPCION",
+          "evidencia": "la licencia de evaluacion (cifrado bajo) no tiene 'strong-crypto'",
+          "por_que": "Solo cifrados fuertes en HTTPS, SSH y VPN.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.10",
+          "titulo": "Ensure management GUI listens on secure TLS version",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "admin-https-ssl-versions tlsv1-2",
+          "por_que": "La interfaz web no acepta TLS 1.0/1.1.",
+          "remediacion": []
+        },
+        {
+          "id": "2.2.1",
+          "titulo": "Ensure 'Password Policy' is enabled",
+          "nivel": 1,
+          "seccion": "Politica de contrasenas",
+          "estado": "CUMPLE",
+          "evidencia": "password-policy enable, minimum-length 12",
+          "por_que": "Claves de administrador largas y complejas (12 caracteres, mayuscula, minuscula, numero y simbolo).",
+          "remediacion": []
+        },
+        {
+          "id": "2.2.2",
+          "titulo": "Ensure administrator password retries and lockout time are configured",
+          "nivel": 1,
+          "seccion": "Politica de contrasenas",
+          "estado": "CUMPLE",
+          "evidencia": "threshold 3, duration 900s",
+          "por_que": "Tras 3 intentos fallidos la cuenta se bloquea 15 minutos (contra fuerza bruta).",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.2",
+          "titulo": "Ensure all the login accounts having specific trusted hosts enabled",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "todos los administradores con trusted hosts",
+          "por_que": "El administrador solo puede entrar desde la estacion de gestion 10.7.42.10.",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.4",
+          "titulo": "Ensure idle timeout time is configured",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "admintimeout 5 min",
+          "por_que": "Una sesion de administracion olvidada se cierra a los 5 minutos.",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.5",
+          "titulo": "Ensure only encrypted access channels are enabled",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "solo HTTPS y SSH para administrar",
+          "por_que": "HTTP y Telnet mandan la clave en texto plano: solo HTTPS y SSH.",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.7",
+          "titulo": "Ensure default Admin ports are changed",
+          "nivel": 2,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "admin-sport 8443",
+          "por_que": "La interfaz web pasa del 443 al 8443 para no estar en el puerto que todos escanean. (SSH se deja en 22 porque lo usan las herramientas de auditoria.)",
+          "remediacion": []
+        },
+        {
+          "id": "1.3",
+          "titulo": "Disable all management related services on WAN port",
+          "nivel": 1,
+          "seccion": "Red",
+          "estado": "CUMPLE",
+          "evidencia": "port1 allowaccess: ping",
+          "por_que": "Nadie desde Internet puede llegar a la administracion del firewall.",
+          "remediacion": []
+        },
+        {
+          "id": "3.2",
+          "titulo": "Ensure that policies do not use 'ALL' as Service",
+          "nivel": 1,
+          "seccion": "Politicas de firewall",
+          "estado": "CUMPLE",
+          "evidencia": "ninguna politica usa el servicio ALL",
+          "por_que": "La LAN solo sale por los servicios que necesita (HTTP, HTTPS, DNS y ping).",
+          "remediacion": []
+        },
+        {
+          "id": "3.4",
+          "titulo": "Ensure firewall policy is logging",
+          "nivel": 1,
+          "seccion": "Politicas de firewall",
+          "estado": "CUMPLE",
+          "evidencia": "todas las politicas registran trafico",
+          "por_que": "Todo el trafico permitido queda registrado.",
+          "remediacion": []
+        },
+        {
+          "id": "7.3.1",
+          "titulo": "Ensure Syslog is enabled (centralized logging)",
+          "nivel": 1,
+          "seccion": "Registros",
+          "estado": "CUMPLE",
+          "evidencia": "syslog enable -> 10.7.42.10",
+          "por_que": "Los registros se envian al servidor syslog (el Kali), fuera del firewall.",
+          "remediacion": []
+        }
+      ],
+      "resumen_antes": {
+        "CUMPLE": 16,
+        "NO CUMPLE": 1,
+        "EXCEPCION": 1,
+        "ERROR": 0,
+        "porcentaje": 94
+      },
+      "despues": [
+        {
+          "id": "2.1.5",
+          "titulo": "Ensure hostname is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "hostname FGT1",
+          "por_que": "Identifica el equipo en registros y en la gestion (el nombre de fabrica no dice nada).",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1",
+          "titulo": "Ensure 'Pre-Login Banner' is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "pre-login-banner enable",
+          "por_que": "Aviso legal antes de iniciar sesion.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.2",
+          "titulo": "Ensure 'Post-Login-Banner' is set",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "post-login-banner enable",
+          "por_que": "Aviso despues de iniciar sesion.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.3",
+          "titulo": "Ensure timezone is properly configured",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "timezone 15",
+          "por_que": "Los registros tienen que tener la hora local correcta para poder cruzarlos con los demas equipos.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.4",
+          "titulo": "Ensure correct system time is configured through NTP",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "ntpsync enable (fortiguard)",
+          "por_que": "Hora sincronizada para que los registros sean confiables.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.7",
+          "titulo": "Disable USB Firmware and configuration installation",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "auto-install-config/image disable",
+          "por_que": "Nadie puede cambiar el firmware o la configuracion conectando una memoria USB.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.9",
+          "titulo": "Enable Global Strong Encryption",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "EXCEPCION",
+          "evidencia": "la licencia de evaluacion (cifrado bajo) no tiene 'strong-crypto'",
+          "por_que": "Solo cifrados fuertes en HTTPS, SSH y VPN.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.10",
+          "titulo": "Ensure management GUI listens on secure TLS version",
+          "nivel": 1,
+          "seccion": "Configuracion del sistema",
+          "estado": "CUMPLE",
+          "evidencia": "admin-https-ssl-versions tlsv1-2",
+          "por_que": "La interfaz web no acepta TLS 1.0/1.1.",
+          "remediacion": []
+        },
+        {
+          "id": "2.2.1",
+          "titulo": "Ensure 'Password Policy' is enabled",
+          "nivel": 1,
+          "seccion": "Politica de contrasenas",
+          "estado": "CUMPLE",
+          "evidencia": "password-policy enable, minimum-length 12",
+          "por_que": "Claves de administrador largas y complejas (12 caracteres, mayuscula, minuscula, numero y simbolo).",
+          "remediacion": []
+        },
+        {
+          "id": "2.2.2",
+          "titulo": "Ensure administrator password retries and lockout time are configured",
+          "nivel": 1,
+          "seccion": "Politica de contrasenas",
+          "estado": "CUMPLE",
+          "evidencia": "threshold 3, duration 900s",
+          "por_que": "Tras 3 intentos fallidos la cuenta se bloquea 15 minutos (contra fuerza bruta).",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.2",
+          "titulo": "Ensure all the login accounts having specific trusted hosts enabled",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "todos los administradores con trusted hosts",
+          "por_que": "El administrador solo puede entrar desde la estacion de gestion 10.7.42.10.",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.4",
+          "titulo": "Ensure idle timeout time is configured",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "admintimeout 5 min",
+          "por_que": "Una sesion de administracion olvidada se cierra a los 5 minutos.",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.5",
+          "titulo": "Ensure only encrypted access channels are enabled",
+          "nivel": 1,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "solo HTTPS y SSH para administrar",
+          "por_que": "HTTP y Telnet mandan la clave en texto plano: solo HTTPS y SSH.",
+          "remediacion": []
+        },
+        {
+          "id": "2.4.7",
+          "titulo": "Ensure default Admin ports are changed",
+          "nivel": 2,
+          "seccion": "Administradores",
+          "estado": "CUMPLE",
+          "evidencia": "admin-sport 8443",
+          "por_que": "La interfaz web pasa del 443 al 8443 para no estar en el puerto que todos escanean. (SSH se deja en 22 porque lo usan las herramientas de auditoria.)",
+          "remediacion": []
+        },
+        {
+          "id": "1.3",
+          "titulo": "Disable all management related services on WAN port",
+          "nivel": 1,
+          "seccion": "Red",
+          "estado": "CUMPLE",
+          "evidencia": "port1 allowaccess: ping",
+          "por_que": "Nadie desde Internet puede llegar a la administracion del firewall.",
+          "remediacion": []
+        },
+        {
+          "id": "3.2",
+          "titulo": "Ensure that policies do not use 'ALL' as Service",
+          "nivel": 1,
+          "seccion": "Politicas de firewall",
+          "estado": "CUMPLE",
+          "evidencia": "ninguna politica usa el servicio ALL",
+          "por_que": "La LAN solo sale por los servicios que necesita (HTTP, HTTPS, DNS y ping).",
+          "remediacion": []
+        },
+        {
+          "id": "3.4",
+          "titulo": "Ensure firewall policy is logging",
+          "nivel": 1,
+          "seccion": "Politicas de firewall",
+          "estado": "CUMPLE",
+          "evidencia": "todas las politicas registran trafico",
+          "por_que": "Todo el trafico permitido queda registrado.",
+          "remediacion": []
+        },
+        {
+          "id": "7.3.1",
+          "titulo": "Ensure Syslog is enabled (centralized logging)",
+          "nivel": 1,
+          "seccion": "Registros",
+          "estado": "CUMPLE",
+          "evidencia": "syslog enable -> 10.7.42.10",
+          "por_que": "Los registros se envian al servidor syslog (el Kali), fuera del firewall.",
+          "remediacion": []
+        }
+      ],
+      "resumen_despues": {
+        "CUMPLE": 17,
+        "NO CUMPLE": 0,
+        "EXCEPCION": 1,
+        "ERROR": 0,
+        "porcentaje": 100
+      },
+      "comandos_aplicados": [
+        "config system global",
+        "set timezone 15",
+        "end"
+      ]
+    }
+  ]
+}

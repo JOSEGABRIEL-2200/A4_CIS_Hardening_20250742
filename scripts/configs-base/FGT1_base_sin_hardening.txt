@@ -1,0 +1,46 @@
+# FGT1 - ASIGNACION 4 - CONFIGURACION BASE (SIN ENDURECER, A PROPOSITO)
+# FortiOS 7.0.3. No lleva claves: la del usuario admin se pone al primer inicio de sesion.
+# Se pega en la consola del FortiGate, un bloque (config ... end) a la vez, sin estas lineas con #.
+# Debilidades a proposito: HTTP y Telnet para administrar, administracion abierta en el puerto WAN,
+# politica con servicio ALL y sin registro, sin banners, sin trusted hosts, sin politica de contrasenas,
+# GUI en el 443 con TLS 1.1, inactividad de 30 minutos, instalacion por USB activa y sin syslog.
+config system interface
+    edit "port1"
+        set alias "WAN-INTERNET"
+        set mode dhcp
+        set allowaccess ping https ssh http fgfm
+        set role wan
+    next
+    edit "port2"
+        set alias "LAN-R1"
+        set mode static
+        set ip 10.7.42.146 255.255.255.252
+        set allowaccess ping https ssh http telnet
+        set role lan
+    next
+end
+config router static
+    edit 1
+        set dst 10.7.42.0 255.255.255.0
+        set gateway 10.7.42.145
+        set device "port2"
+    next
+end
+config firewall policy
+    edit 1
+        set name "LAN-a-INTERNET"
+        set srcintf "port2"
+        set dstintf "port1"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic disable
+        set nat enable
+    next
+end
+config system global
+    set admintimeout 30
+    set admin-https-ssl-versions tlsv1-1 tlsv1-2 tlsv1-3
+end

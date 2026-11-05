@@ -1,0 +1,46 @@
+! R1 - ASIGNACION 4 - CONFIGURACION BASE (SIN ENDURECER, A PROPOSITO). Las claves se cambiaron por <CLAVE>.
+! Copia desde "enable" hasta "write memory" y pegalo en la consola de R1.
+! Si al final pregunta "How many bits in the modulus", es normal: ya lleva 1024.
+enable
+configure terminal
+hostname R1
+ip domain-name jose.gabriel
+enable password <CLAVE>
+username admin privilege 15 password <CLAVE>
+interface Ethernet0/0
+ description WAN-FGT1-port2
+ ip address 10.7.42.145 255.255.255.252
+ no shutdown
+interface Ethernet0/1
+ description TRUNK-SW1-e0/0
+ no ip address
+ no shutdown
+interface Ethernet0/1.10
+ description VLAN10-LAN
+ encapsulation dot1Q 10
+ ip address 10.7.42.1 255.255.255.128
+interface Ethernet0/1.99
+ description VLAN99-GESTION
+ encapsulation dot1Q 99
+ ip address 10.7.42.137 255.255.255.248
+interface range Ethernet0/2 - 3
+ shutdown
+exit
+ip route 0.0.0.0 0.0.0.0 10.7.42.146
+ip dhcp excluded-address 10.7.42.1 10.7.42.9
+ip dhcp pool LAN-VLAN10
+ network 10.7.42.0 255.255.255.128
+ default-router 10.7.42.1
+ip dhcp pool AUDITOR
+ host 10.7.42.10 255.255.255.128
+ client-identifier 0100.0c29.a89b.d3
+ default-router 10.7.42.1
+exit
+snmp-server community public RO
+line vty 0 4
+ login local
+ transport input telnet ssh
+exit
+crypto key generate rsa general-keys modulus 1024
+end
+write memory

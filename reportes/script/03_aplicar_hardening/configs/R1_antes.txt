@@ -1,0 +1,151 @@
+Building configuration...
+
+  
+Current configuration : 1794 bytes
+!
+! Last configuration change at 18:10:31 UTC Thu Nov 5 2026 by admin
+!
+version 15.7
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 9 <OCULTO>
+!
+no aaa new-model
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+ip dhcp excluded-address 10.7.42.1 10.7.42.9
+!
+ip dhcp pool LAN-VLAN10
+ network 10.7.42.0 255.255.255.128
+ default-router 10.7.42.1 
+!
+ip dhcp pool AUDITOR
+ host 10.7.42.10 255.255.255.128
+ client-identifier 0100.0c29.a89b.d3
+ default-router 10.7.42.1 
+!
+!
+!
+ip domain name jose.gabriel
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+username admin secret 9 <OCULTO>
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description WAN-FGT1-port2
+ ip address 10.7.42.145 255.255.255.252
+ duplex auto
+!
+interface Ethernet0/1
+ description TRUNK-SW1-e0/0
+ no ip address
+ duplex auto
+!
+interface Ethernet0/1.10
+ description VLAN10-LAN
+ encapsulation dot1Q 10
+ ip address 10.7.42.1 255.255.255.128
+!
+interface Ethernet0/1.99
+ description VLAN99-GESTION
+ encapsulation dot1Q 99
+ ip address 10.7.42.137 255.255.255.248
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+ duplex auto
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 10.7.42.146
+!
+ipv6 ioam timestamp
+!
+snmp-server community <OCULTO> RO
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login local
+ transport input telnet ssh
+!
+!
+end

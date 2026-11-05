@@ -1,0 +1,996 @@
+{
+  "modo": "aplicar",
+  "fecha": "2026-11-05 13:10:00",
+  "equipos": [
+    {
+      "nombre": "R1",
+      "ip": "10.7.42.1",
+      "tipo": "ios",
+      "rol": "router",
+      "error": "RuntimeError: usuario admin: no quedo en la configuracion; se detiene la aplicacion para no perder el acceso (revisar por consola)",
+      "benchmark": "CIS Cisco IOS 15 Benchmark v4.1.1",
+      "antes": [
+        {
+          "id": "1.4.1",
+          "titulo": "Set 'password' for 'enable secret'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "usa 'enable password' (texto plano o tipo 7)",
+          "por_que": "'enable password' se guarda en texto o con cifrado reversible (tipo 7); 'enable secret' guarda un hash (scrypt).",
+          "remediacion": [
+            "enable algorithm-type scrypt secret <OCULTO>",
+            "no enable password"
+          ]
+        },
+        {
+          "id": "1.4.2",
+          "titulo": "Enable 'service password-encryption'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "no service password-encryption",
+          "por_que": "Evita que cualquier clave que quede en texto plano se vea en un 'show running-config' o en un respaldo.",
+          "remediacion": [
+            "service password-encryption"
+          ]
+        },
+        {
+          "id": "1.4.3",
+          "titulo": "Set 'username secret' for all local users",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "usuarios con 'password' (reversible): admin",
+          "por_que": "La clave del usuario local con 'password' se puede revertir; con 'secret' queda como hash.",
+          "remediacion": [
+            "no username admin",
+            "username admin privilege 1 algorithm-type scrypt secret <OCULTO>"
+          ]
+        },
+        {
+          "id": "1.2.1",
+          "titulo": "Set 'privilege 1' for local users",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "usuarios con privilegio > 1: username admin privilege 15",
+          "por_que": "El usuario entra con privilegio minimo y tiene que usar 'enable' para administrar (minimo privilegio).",
+          "remediacion": [
+            "no username admin",
+            "username admin privilege 1 algorithm-type scrypt secret <OCULTO>"
+          ]
+        },
+        {
+          "id": "1.1.1",
+          "titulo": "Enable 'aaa new-model'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "no aaa new-model",
+          "por_que": "Activa el modelo AAA para controlar quien entra, que puede hacer y dejar registro.",
+          "remediacion": [
+            "aaa new-model",
+            "aaa authentication login default local",
+            "aaa authentication enable default enable",
+            "aaa authorization exec default local"
+          ]
+        },
+        {
+          "id": "1.1.2",
+          "titulo": "Enable 'aaa authentication login'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'aaa authentication login'",
+          "por_que": "Define el metodo de autenticacion del login (base local; no hay servidor AAA en esta red).",
+          "remediacion": [
+            "aaa new-model",
+            "aaa authentication login default local",
+            "aaa authentication enable default enable",
+            "aaa authorization exec default local"
+          ]
+        },
+        {
+          "id": "1.1.3",
+          "titulo": "Enable 'aaa authentication enable default'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'aaa authentication enable default'",
+          "por_que": "El paso a modo privilegiado tambien queda bajo AAA.",
+          "remediacion": [
+            "aaa new-model",
+            "aaa authentication login default local",
+            "aaa authentication enable default enable",
+            "aaa authorization exec default local"
+          ]
+        },
+        {
+          "id": "1.1.4",
+          "titulo": "Set 'login authentication for 'line con 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "line con 0 sin 'login authentication'",
+          "por_que": "La consola fisica tambien pide usuario y clave.",
+          "remediacion": [
+            "line con 0",
+            " login authentication default"
+          ]
+        },
+        {
+          "id": "1.1.6",
+          "titulo": "Set 'login authentication for 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'login authentication' en: line vty 0 4",
+          "por_que": "Las lineas remotas usan la lista AAA de forma explicita.",
+          "remediacion": [
+            "line vty 0 4",
+            " login authentication default"
+          ]
+        },
+        {
+          "id": "1.2.2",
+          "titulo": "Set 'transport input ssh' for 'line vty' connections",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "line vty 0 4: transport input telnet ssh",
+          "por_que": "Telnet viaja en texto plano (usuario y clave incluidos); solo se permite SSH.",
+          "remediacion": [
+            "line vty 0 4",
+            " transport input ssh"
+          ]
+        },
+        {
+          "id": "1.2.4",
+          "titulo": "Create 'access-list' for use with 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "no existe la ACL de gestion ACL-GESTION-SSH (Onyx cuenta ACL de fabrica de la imagen)",
+          "por_que": "Lista de los unicos equipos que pueden administrar: la estacion de gestion 10.7.42.10.",
+          "remediacion": [
+            "ip access-list standard ACL-GESTION-SSH",
+            " remark Solo la estacion de gestion entra por SSH",
+            " permit host 10.7.42.10",
+            " deny any log"
+          ]
+        },
+        {
+          "id": "1.2.5",
+          "titulo": "Set 'access-class' for 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin access-class en: line vty 0 4",
+          "por_que": "Aplica esa ACL a las lineas remotas; cualquier otra IP es rechazada y registrada.",
+          "remediacion": [
+            "line vty 0 4",
+            " access-class ACL-GESTION-SSH in"
+          ]
+        },
+        {
+          "id": "1.2.3",
+          "titulo": "Set 'no exec' for 'line aux 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "line aux 0 permite exec",
+          "por_que": "El puerto auxiliar no se usa: se cierra para que no sea una puerta de entrada.",
+          "remediacion": [
+            "line aux 0",
+            " no exec",
+            " transport input none"
+          ]
+        },
+        {
+          "id": "1.2.6",
+          "titulo": "Set 'exec-timeout' to less than or equal to 10 minutes for 'line aux 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "exec-timeout por defecto (10 min, no queda registrado en la configuracion)",
+          "por_que": "Una sesion olvidada se cierra sola.",
+          "remediacion": [
+            "line aux 0",
+            " exec-timeout 5 0"
+          ]
+        },
+        {
+          "id": "1.2.7",
+          "titulo": "Set 'exec-timeout' to less than or equal to 10 minutes 'line console 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "exec-timeout por defecto (10 min, no queda registrado en la configuracion)",
+          "por_que": "Una sesion de consola olvidada se cierra sola.",
+          "remediacion": [
+            "line con 0",
+            " exec-timeout 5 0"
+          ]
+        },
+        {
+          "id": "1.2.8",
+          "titulo": "Set 'exec-timeout' less than or equal to 10 minutes 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "exec-timeout por defecto (10 min, no queda registrado en la configuracion)",
+          "por_que": "Una sesion SSH olvidada se cierra sola.",
+          "remediacion": [
+            "line vty 0 4",
+            " exec-timeout 5 0"
+          ]
+        },
+        {
+          "id": "1.3.1",
+          "titulo": "Set the 'banner-text' for 'banner exec'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin banner exec",
+          "por_que": "Aviso legal al entrar a la sesion.",
+          "remediacion": [
+            "banner exec ^ACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [R1 - exec]^"
+          ]
+        },
+        {
+          "id": "1.3.2",
+          "titulo": "Set the 'banner-text' for 'banner login'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin banner login",
+          "por_que": "Aviso antes de pedir usuario y clave.",
+          "remediacion": [
+            "banner login ^ACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [R1 - login]^"
+          ]
+        },
+        {
+          "id": "1.3.3",
+          "titulo": "Set the 'banner-text' for 'banner motd'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin banner motd",
+          "por_que": "Mensaje del dia con la advertencia de acceso restringido.",
+          "remediacion": [
+            "banner motd ^ACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [R1 - motd]^"
+          ]
+        },
+        {
+          "id": "1.5.1",
+          "titulo": "Set 'no snmp-server' to disable SNMP when unused",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "snmp-server community <OCULTO> RO",
+          "por_que": "En esta red no hay sistema de monitoreo: SNMP con 'public' solo regala informacion.",
+          "remediacion": [
+            "no snmp-server"
+          ]
+        },
+        {
+          "id": "2.1.1.1.1",
+          "titulo": "Set the 'hostname'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "CUMPLE",
+          "evidencia": "hostname R1",
+          "por_que": "Requisito para generar la clave RSA de SSH e identificar el equipo en los registros.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1.1.2",
+          "titulo": "Set the 'ip domain-name'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "CUMPLE",
+          "evidencia": "ip domain name jose.gabriel",
+          "por_que": "Requisito para generar la clave RSA de SSH.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1.1.4",
+          "titulo": "Set 'seconds' for 'ip ssh timeout'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "ip ssh time-out 120 (maximo 60)",
+          "por_que": "Limita el tiempo que un cliente tiene para autenticarse (60 s).",
+          "remediacion": [
+            "ip ssh time-out 60"
+          ]
+        },
+        {
+          "id": "2.1.1.1.5",
+          "titulo": "Set maximum value for 'ip ssh authentication-retries'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "CUMPLE",
+          "evidencia": "ip ssh authentication-retries 3",
+          "por_que": "Maximo 3 intentos por conexion contra fuerza bruta.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1.2",
+          "titulo": "Set version 2 for 'ip ssh version'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "SSH version 1.99 (acepta SSHv1)",
+          "por_que": "SSHv1 tiene fallas conocidas; solo se acepta la version 2.",
+          "remediacion": [
+            "ip ssh version 2"
+          ]
+        },
+        {
+          "id": "2.1.2",
+          "titulo": "Set 'no cdp run'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "CDP habilitado (anuncia modelo, IOS e IP a los vecinos)",
+          "por_que": "CDP anuncia modelo, version de IOS e IP de gestion a cualquier vecino.",
+          "remediacion": [
+            "no cdp run"
+          ]
+        },
+        {
+          "id": "2.1.3",
+          "titulo": "Set 'no ip bootp server'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "falta 'no ip bootp server'",
+          "por_que": "Servicio viejo que no se usa y permite descargar imagenes del equipo.",
+          "remediacion": [
+            "no ip bootp server"
+          ]
+        },
+        {
+          "id": "2.1.4",
+          "titulo": "Set 'no service dhcp'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "EXCEPCION",
+          "evidencia": "R1 es el servidor DHCP de la LAN (lo pide la red): 'no service dhcp' lo apagaria",
+          "por_que": "En el switch no hace falta el servidor/relay DHCP; en R1 es una excepcion porque es el servidor DHCP de la LAN.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.6",
+          "titulo": "Set 'service tcp-keepalives-in'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "falta 'service tcp-keepalives-in'",
+          "por_que": "Cierra las sesiones TCP entrantes que quedan colgadas.",
+          "remediacion": [
+            "service tcp-keepalives-in"
+          ]
+        },
+        {
+          "id": "2.1.7",
+          "titulo": "Set 'service tcp-keepalives-out'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "falta 'service tcp-keepalives-out'",
+          "por_que": "Cierra las sesiones TCP salientes que quedan colgadas.",
+          "remediacion": [
+            "service tcp-keepalives-out"
+          ]
+        },
+        {
+          "id": "2.1.8",
+          "titulo": "Set 'no service pad'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "service pad (X.25 PAD activo)",
+          "por_que": "El PAD de X.25 no se usa; es un servicio menos expuesto.",
+          "remediacion": [
+            "no service pad"
+          ]
+        },
+        {
+          "id": "2.2.2",
+          "titulo": "Set 'buffer size' for 'logging buffered'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin tamano de 'logging buffered'",
+          "por_que": "Guarda los ultimos eventos en memoria para poder revisarlos.",
+          "remediacion": [
+            "logging buffered 64000"
+          ]
+        },
+        {
+          "id": "2.2.3",
+          "titulo": "Set 'logging console critical'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "la consola recibe todos los mensajes",
+          "por_que": "La consola solo muestra mensajes criticos (evita saturarla).",
+          "remediacion": [
+            "logging console critical"
+          ]
+        },
+        {
+          "id": "2.2.4",
+          "titulo": "Set IP address for 'logging host'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin servidor syslog",
+          "por_que": "Envia los registros a un servidor syslog externo (el Kali): si atacan el equipo, el registro queda afuera.",
+          "remediacion": [
+            "logging host 10.7.42.10",
+            "logging trap informational"
+          ]
+        },
+        {
+          "id": "2.2.7",
+          "titulo": "Set 'logging source interface'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'logging source-interface'",
+          "por_que": "Los mensajes syslog salen siempre con la misma IP de origen.",
+          "remediacion": [
+            "logging source-interface Ethernet0/1.10"
+          ]
+        },
+        {
+          "id": "3.1.1",
+          "titulo": "Set 'no ip source-route'",
+          "nivel": 1,
+          "seccion": "Plano de datos",
+          "estado": "NO CUMPLE",
+          "evidencia": "ip source-route (por defecto)",
+          "por_que": "Impide que un paquete elija su propia ruta (se usa para saltarse controles).",
+          "remediacion": [
+            "no ip source-route"
+          ]
+        },
+        {
+          "id": "3.1.2",
+          "titulo": "Set 'no ip proxy-arp'",
+          "nivel": 2,
+          "seccion": "Plano de datos",
+          "estado": "NO CUMPLE",
+          "evidencia": "proxy-arp activo en: Ethernet0/0, Ethernet0/1.10, Ethernet0/1.99",
+          "por_que": "El equipo no responde ARP en nombre de otros (evita suplantaciones y fugas entre redes).",
+          "remediacion": [
+            "interface Ethernet0/0",
+            " no ip proxy-arp",
+            "interface Ethernet0/1.10",
+            " no ip proxy-arp",
+            "interface Ethernet0/1.99",
+            " no ip proxy-arp"
+          ]
+        },
+        {
+          "id": "2.1.1.1.3",
+          "titulo": "Set 'modulus' to greater than or equal to 2048 for 'crypto key generate rsa'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "clave RSA de 1024 bits (minimo 2048)",
+          "por_que": "Una clave RSA de 1024 bits ya no se considera segura. (Onyx marca este punto como cumplido solo porque existe una clave; este script mide su tamano real.)",
+          "remediacion": [
+            "crypto key generate rsa general-keys modulus 2048"
+          ]
+        }
+      ],
+      "resumen_antes": {
+        "CUMPLE": 3,
+        "NO CUMPLE": 34,
+        "EXCEPCION": 1,
+        "ERROR": 0,
+        "porcentaje": 8
+      },
+      "comandos_aplicados": []
+    },
+    {
+      "nombre": "SW1",
+      "ip": "10.7.42.138",
+      "tipo": "ios",
+      "rol": "switch",
+      "error": "RuntimeError: usuario admin: no quedo en la configuracion; se detiene la aplicacion para no perder el acceso (revisar por consola)",
+      "benchmark": "CIS Cisco IOS 15 Benchmark v4.1.1",
+      "antes": [
+        {
+          "id": "1.4.1",
+          "titulo": "Set 'password' for 'enable secret'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "usa 'enable password' (texto plano o tipo 7)",
+          "por_que": "'enable password' se guarda en texto o con cifrado reversible (tipo 7); 'enable secret' guarda un hash (scrypt).",
+          "remediacion": [
+            "enable algorithm-type scrypt secret <OCULTO>",
+            "no enable password"
+          ]
+        },
+        {
+          "id": "1.4.2",
+          "titulo": "Enable 'service password-encryption'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "no service password-encryption",
+          "por_que": "Evita que cualquier clave que quede en texto plano se vea en un 'show running-config' o en un respaldo.",
+          "remediacion": [
+            "service password-encryption"
+          ]
+        },
+        {
+          "id": "1.4.3",
+          "titulo": "Set 'username secret' for all local users",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "usuarios con 'password' (reversible): admin",
+          "por_que": "La clave del usuario local con 'password' se puede revertir; con 'secret' queda como hash.",
+          "remediacion": [
+            "no username admin",
+            "username admin privilege 1 algorithm-type scrypt secret <OCULTO>"
+          ]
+        },
+        {
+          "id": "1.2.1",
+          "titulo": "Set 'privilege 1' for local users",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "usuarios con privilegio > 1: username admin privilege 15",
+          "por_que": "El usuario entra con privilegio minimo y tiene que usar 'enable' para administrar (minimo privilegio).",
+          "remediacion": [
+            "no username admin",
+            "username admin privilege 1 algorithm-type scrypt secret <OCULTO>"
+          ]
+        },
+        {
+          "id": "1.1.1",
+          "titulo": "Enable 'aaa new-model'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "no aaa new-model",
+          "por_que": "Activa el modelo AAA para controlar quien entra, que puede hacer y dejar registro.",
+          "remediacion": [
+            "aaa new-model",
+            "aaa authentication login default local",
+            "aaa authentication enable default enable",
+            "aaa authorization exec default local"
+          ]
+        },
+        {
+          "id": "1.1.2",
+          "titulo": "Enable 'aaa authentication login'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'aaa authentication login'",
+          "por_que": "Define el metodo de autenticacion del login (base local; no hay servidor AAA en esta red).",
+          "remediacion": [
+            "aaa new-model",
+            "aaa authentication login default local",
+            "aaa authentication enable default enable",
+            "aaa authorization exec default local"
+          ]
+        },
+        {
+          "id": "1.1.3",
+          "titulo": "Enable 'aaa authentication enable default'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'aaa authentication enable default'",
+          "por_que": "El paso a modo privilegiado tambien queda bajo AAA.",
+          "remediacion": [
+            "aaa new-model",
+            "aaa authentication login default local",
+            "aaa authentication enable default enable",
+            "aaa authorization exec default local"
+          ]
+        },
+        {
+          "id": "1.1.4",
+          "titulo": "Set 'login authentication for 'line con 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "line con 0 sin 'login authentication'",
+          "por_que": "La consola fisica tambien pide usuario y clave.",
+          "remediacion": [
+            "line con 0",
+            " login authentication default"
+          ]
+        },
+        {
+          "id": "1.1.6",
+          "titulo": "Set 'login authentication for 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'login authentication' en: line vty 0 4",
+          "por_que": "Las lineas remotas usan la lista AAA de forma explicita.",
+          "remediacion": [
+            "line vty 0 4",
+            " login authentication default"
+          ]
+        },
+        {
+          "id": "1.2.2",
+          "titulo": "Set 'transport input ssh' for 'line vty' connections",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "line vty 0 4: transport input telnet ssh",
+          "por_que": "Telnet viaja en texto plano (usuario y clave incluidos); solo se permite SSH.",
+          "remediacion": [
+            "line vty 0 4",
+            " transport input ssh"
+          ]
+        },
+        {
+          "id": "1.2.4",
+          "titulo": "Create 'access-list' for use with 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "no existe la ACL de gestion ACL-GESTION-SSH (Onyx cuenta ACL de fabrica de la imagen)",
+          "por_que": "Lista de los unicos equipos que pueden administrar: la estacion de gestion 10.7.42.10.",
+          "remediacion": [
+            "ip access-list standard ACL-GESTION-SSH",
+            " remark Solo la estacion de gestion entra por SSH",
+            " permit host 10.7.42.10",
+            " deny any log"
+          ]
+        },
+        {
+          "id": "1.2.5",
+          "titulo": "Set 'access-class' for 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin access-class en: line vty 0 4",
+          "por_que": "Aplica esa ACL a las lineas remotas; cualquier otra IP es rechazada y registrada.",
+          "remediacion": [
+            "line vty 0 4",
+            " access-class ACL-GESTION-SSH in"
+          ]
+        },
+        {
+          "id": "1.2.3",
+          "titulo": "Set 'no exec' for 'line aux 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "line aux 0 permite exec",
+          "por_que": "El puerto auxiliar no se usa: se cierra para que no sea una puerta de entrada.",
+          "remediacion": [
+            "line aux 0",
+            " no exec",
+            " transport input none"
+          ]
+        },
+        {
+          "id": "1.2.6",
+          "titulo": "Set 'exec-timeout' to less than or equal to 10 minutes for 'line aux 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "exec-timeout por defecto (10 min, no queda registrado en la configuracion)",
+          "por_que": "Una sesion olvidada se cierra sola.",
+          "remediacion": [
+            "line aux 0",
+            " exec-timeout 5 0"
+          ]
+        },
+        {
+          "id": "1.2.7",
+          "titulo": "Set 'exec-timeout' to less than or equal to 10 minutes 'line console 0'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "exec-timeout por defecto (10 min, no queda registrado en la configuracion)",
+          "por_que": "Una sesion de consola olvidada se cierra sola.",
+          "remediacion": [
+            "line con 0",
+            " exec-timeout 5 0"
+          ]
+        },
+        {
+          "id": "1.2.8",
+          "titulo": "Set 'exec-timeout' less than or equal to 10 minutes 'line vty'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "exec-timeout por defecto (10 min, no queda registrado en la configuracion)",
+          "por_que": "Una sesion SSH olvidada se cierra sola.",
+          "remediacion": [
+            "line vty 0 4",
+            " exec-timeout 5 0"
+          ]
+        },
+        {
+          "id": "1.3.1",
+          "titulo": "Set the 'banner-text' for 'banner exec'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin banner exec",
+          "por_que": "Aviso legal al entrar a la sesion.",
+          "remediacion": [
+            "banner exec ^ACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [SW1 - exec]^"
+          ]
+        },
+        {
+          "id": "1.3.2",
+          "titulo": "Set the 'banner-text' for 'banner login'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin banner login",
+          "por_que": "Aviso antes de pedir usuario y clave.",
+          "remediacion": [
+            "banner login ^ACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [SW1 - login]^"
+          ]
+        },
+        {
+          "id": "1.3.3",
+          "titulo": "Set the 'banner-text' for 'banner motd'",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin banner motd",
+          "por_que": "Mensaje del dia con la advertencia de acceso restringido.",
+          "remediacion": [
+            "banner motd ^ACCESO RESTRINGIDO - Solo personal autorizado. Toda actividad es registrada y auditada. [SW1 - motd]^"
+          ]
+        },
+        {
+          "id": "1.5.1",
+          "titulo": "Set 'no snmp-server' to disable SNMP when unused",
+          "nivel": 1,
+          "seccion": "Plano de gestion",
+          "estado": "NO CUMPLE",
+          "evidencia": "snmp-server community <OCULTO> RO",
+          "por_que": "En esta red no hay sistema de monitoreo: SNMP con 'public' solo regala informacion.",
+          "remediacion": [
+            "no snmp-server"
+          ]
+        },
+        {
+          "id": "2.1.1.1.1",
+          "titulo": "Set the 'hostname'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "CUMPLE",
+          "evidencia": "hostname SW1",
+          "por_que": "Requisito para generar la clave RSA de SSH e identificar el equipo en los registros.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1.1.2",
+          "titulo": "Set the 'ip domain-name'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "CUMPLE",
+          "evidencia": "ip domain-name jose.gabriel",
+          "por_que": "Requisito para generar la clave RSA de SSH.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1.1.4",
+          "titulo": "Set 'seconds' for 'ip ssh timeout'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "ip ssh time-out 120 (maximo 60)",
+          "por_que": "Limita el tiempo que un cliente tiene para autenticarse (60 s).",
+          "remediacion": [
+            "ip ssh time-out 60"
+          ]
+        },
+        {
+          "id": "2.1.1.1.5",
+          "titulo": "Set maximum value for 'ip ssh authentication-retries'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "CUMPLE",
+          "evidencia": "ip ssh authentication-retries 3",
+          "por_que": "Maximo 3 intentos por conexion contra fuerza bruta.",
+          "remediacion": []
+        },
+        {
+          "id": "2.1.1.2",
+          "titulo": "Set version 2 for 'ip ssh version'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "SSH version 1.99 (acepta SSHv1)",
+          "por_que": "SSHv1 tiene fallas conocidas; solo se acepta la version 2.",
+          "remediacion": [
+            "ip ssh version 2"
+          ]
+        },
+        {
+          "id": "2.1.2",
+          "titulo": "Set 'no cdp run'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "CDP habilitado (anuncia modelo, IOS e IP a los vecinos)",
+          "por_que": "CDP anuncia modelo, version de IOS e IP de gestion a cualquier vecino.",
+          "remediacion": [
+            "no cdp run"
+          ]
+        },
+        {
+          "id": "2.1.3",
+          "titulo": "Set 'no ip bootp server'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "falta 'no ip bootp server'",
+          "por_que": "Servicio viejo que no se usa y permite descargar imagenes del equipo.",
+          "remediacion": [
+            "no ip bootp server"
+          ]
+        },
+        {
+          "id": "2.1.4",
+          "titulo": "Set 'no service dhcp'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "service dhcp activo",
+          "por_que": "En el switch no hace falta el servidor/relay DHCP; en R1 es una excepcion porque es el servidor DHCP de la LAN.",
+          "remediacion": [
+            "no service dhcp"
+          ]
+        },
+        {
+          "id": "2.1.6",
+          "titulo": "Set 'service tcp-keepalives-in'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "falta 'service tcp-keepalives-in'",
+          "por_que": "Cierra las sesiones TCP entrantes que quedan colgadas.",
+          "remediacion": [
+            "service tcp-keepalives-in"
+          ]
+        },
+        {
+          "id": "2.1.7",
+          "titulo": "Set 'service tcp-keepalives-out'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "falta 'service tcp-keepalives-out'",
+          "por_que": "Cierra las sesiones TCP salientes que quedan colgadas.",
+          "remediacion": [
+            "service tcp-keepalives-out"
+          ]
+        },
+        {
+          "id": "2.1.8",
+          "titulo": "Set 'no service pad'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "service pad (X.25 PAD activo)",
+          "por_que": "El PAD de X.25 no se usa; es un servicio menos expuesto.",
+          "remediacion": [
+            "no service pad"
+          ]
+        },
+        {
+          "id": "2.2.2",
+          "titulo": "Set 'buffer size' for 'logging buffered'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin tamano de 'logging buffered'",
+          "por_que": "Guarda los ultimos eventos en memoria para poder revisarlos.",
+          "remediacion": [
+            "logging buffered 64000"
+          ]
+        },
+        {
+          "id": "2.2.3",
+          "titulo": "Set 'logging console critical'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "la consola recibe todos los mensajes",
+          "por_que": "La consola solo muestra mensajes criticos (evita saturarla).",
+          "remediacion": [
+            "logging console critical"
+          ]
+        },
+        {
+          "id": "2.2.4",
+          "titulo": "Set IP address for 'logging host'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin servidor syslog",
+          "por_que": "Envia los registros a un servidor syslog externo (el Kali): si atacan el equipo, el registro queda afuera.",
+          "remediacion": [
+            "logging host 10.7.42.10",
+            "logging trap informational"
+          ]
+        },
+        {
+          "id": "2.2.7",
+          "titulo": "Set 'logging source interface'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "sin 'logging source-interface'",
+          "por_que": "Los mensajes syslog salen siempre con la misma IP de origen.",
+          "remediacion": [
+            "logging source-interface Vlan99"
+          ]
+        },
+        {
+          "id": "3.1.1",
+          "titulo": "Set 'no ip source-route'",
+          "nivel": 1,
+          "seccion": "Plano de datos",
+          "estado": "NO CUMPLE",
+          "evidencia": "ip source-route (por defecto)",
+          "por_que": "Impide que un paquete elija su propia ruta (se usa para saltarse controles).",
+          "remediacion": [
+            "no ip source-route"
+          ]
+        },
+        {
+          "id": "3.1.2",
+          "titulo": "Set 'no ip proxy-arp'",
+          "nivel": 2,
+          "seccion": "Plano de datos",
+          "estado": "NO CUMPLE",
+          "evidencia": "proxy-arp activo en: Vlan99",
+          "por_que": "El equipo no responde ARP en nombre de otros (evita suplantaciones y fugas entre redes).",
+          "remediacion": [
+            "interface Vlan99",
+            " no ip proxy-arp"
+          ]
+        },
+        {
+          "id": "2.1.1.1.3",
+          "titulo": "Set 'modulus' to greater than or equal to 2048 for 'crypto key generate rsa'",
+          "nivel": 1,
+          "seccion": "Plano de control",
+          "estado": "NO CUMPLE",
+          "evidencia": "clave RSA de 1024 bits (minimo 2048)",
+          "por_que": "Una clave RSA de 1024 bits ya no se considera segura. (Onyx marca este punto como cumplido solo porque existe una clave; este script mide su tamano real.)",
+          "remediacion": [
+            "crypto key generate rsa general-keys modulus 2048"
+          ]
+        }
+      ],
+      "resumen_antes": {
+        "CUMPLE": 3,
+        "NO CUMPLE": 35,
+        "EXCEPCION": 0,
+        "ERROR": 0,
+        "porcentaje": 8
+      },
+      "comandos_aplicados": []
+    }
+  ]
+}
